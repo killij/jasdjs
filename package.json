@@ -1,0 +1,23 @@
+{
+  "name": "jasdjs",
+  "version": "1.0.0",
+  "description": "Just Another Sequence Diagrammer",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cairnsj/jasdjs.git"
+  },
+  "keywords": [
+    "sequence",
+    "diagram"
+  ],
+  "author": "James Killick",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cairnsj/jasdjs/issues"
+  },
+  "homepage": "https://github.com/cairnsj/jasdjs#readme"
+}
