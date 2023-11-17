@@ -7,13 +7,13 @@ import { G, SVG, Svg } from '@svgdotjs/svg.js'
 import { SequenceDiagram } from "./SequenceDiagram"
 import { Renderer } from './Renderer'
 
-import { Options, DeepPartial, DiagramOptions, BackgroundPattern, Align, TextOptions } from './Options'
+import { Options, DeepPartial, DiagramOptions, BackgroundPattern, Align, TextOptions, TextBoxOptions } from './Options'
 
 import { Dimensions } from './Dimensions'
 import { TitleLayer } from './TitleLayer'
 import { LifelinesLayer } from './LifelinesLayer'
 import { MessagesLayer } from './MessagesLayer'
-import { renderTitle } from './ElementRenderers'
+import { drawText, drawTextBox } from './ElementRenderers'
 
 export interface BodyElementHandler<T> {
     layout(item: T, root: Lifeline, target: Lifeline, setSpacing: Spacer): Dimensions
@@ -85,6 +85,20 @@ export default class SequenceDiagramRenderer {
 
         // lifelines initial spacing
 
+        //const lifelines: Lifeline = []
+
+        for (const participant in this._diagram.participants) {
+
+            //const tb = drawTextBox(this._renderer.draw, "Github \n Actions in action", this._options.lifelines.textBoxOptions)
+
+
+        }
+        
+        
+
+
+
+
         // elements initial layout
 
         // lifelines finalise spacing
@@ -100,27 +114,25 @@ export default class SequenceDiagramRenderer {
         let oY = this._options.padding
         const totalWidth = width;
 
-
-
         if (this._diagram.title) {
             // draw title
-            const g = renderTitle(
+            const g = this._renderer.draw.group()
+            const t = drawText(
                 this._renderer.draw,
                 this._diagram.title,
                 this._options.title.textOptions)
+            g.add(t)
             
             // move into position
             switch (this._options.title.textOptions.align) {
                 case Align.left:
-                    g.transform({ translateX: oX, translateY: oY })
+                    g.translate(oX, oY)
                     break
                 case Align.middle:
-                    const titleCx = totalWidth / 2
-                    g.transform({ translateX: titleCx, translateY: oY })
+                    g.translate(totalWidth / 2, oY)
                     break
                 case Align.right:
-                    const titleX = totalWidth - this._options.padding
-                    g.transform({ translateX: titleX, translateY: oY })
+                    g.translate(totalWidth - this._options.padding, oY)
                     break
             }
 
@@ -130,8 +142,12 @@ export default class SequenceDiagramRenderer {
 
         // move elements/lifelines
         
+        
+        
     }
 }
+
+
 
 
 
