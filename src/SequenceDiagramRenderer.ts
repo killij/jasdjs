@@ -3,17 +3,17 @@
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 //
 
-import { Box, G, Marker, SVG, Svg } from '@svgdotjs/svg.js'
+import { Box, G, Marker, Polyline, SVG, Svg } from '@svgdotjs/svg.js'
 import { Participant, ParticipantTypes, SequenceDiagram } from "./SequenceDiagram"
 import { Renderer } from './Renderer'
 
-import { Options, DeepPartial, DiagramOptions, BackgroundPattern, Align, TextOptions, TextBoxOptions } from './Options'
+import { Options, DeepPartial, DiagramOptions, BackgroundPattern, Align, TextOptions, TextBoxOptions, LifelineOptions, LineOptions } from './Options'
 
 import { Dimensions } from './Dimensions'
 import { TitleLayer } from './TitleLayer'
 import { LifelinesLayer } from './LifelinesLayer'
 import { MessagesLayer } from './MessagesLayer'
-import { drawActor, drawText, drawTextBox } from './ElementRenderers'
+import { drawActor, drawLifeline, drawText, drawTextBox } from './ElementRenderers'
 
 export interface BodyElementHandler<T> {
     layout(item: T, root: Lifeline, target: Lifeline, setSpacing: Spacer): Dimensions
@@ -84,28 +84,25 @@ export default class SequenceDiagramRenderer {
 
 
         // lifelines initial spacing
-        const lifelines = this.createLifelines()
-         
+        const { lifelines, maxHeight } = this.createLifelines()
 
         // elements initial layout
+        
 
         // lifelines finalise spacing
 
         // lifelines draw
-
-        // for (const lifeline of lifelines) {
-        //     const g = drawLifeline(this._renderer.draw, lifeline, this._options.lifelines)
-        // }
-
-
+        const lifelinesGroup = this._renderer.draw.group()
+        for (const lifeline of lifelines.slice(1, lifelines.length - 1)) {
+            const lifelineGroup = drawLifeline(lifelinesGroup, lifeline, 100, this._renderer.icons.actor, this._options.lifelines)
+            lifelineGroup.translate(lifeline.x, maxHeight - lifelineGroup.children()[1].bbox().height)
+        }
 
         // elements draw
+        
 
         // title layout/draw
         // title transform
-        // lifelines/elements transform
-
-
         let oX = this._options.padding
         let oY = this._options.padding
         const totalWidth = width;
@@ -136,12 +133,14 @@ export default class SequenceDiagramRenderer {
             oY += g.bbox().height + this._options.title.paddingBottom
         }
 
-        // move elements/lifelines
+        // lifelines/elements transform
+        lifelinesGroup.move(oX, oY)
     }
 
-    private createLifelines(): Lifeline[] {
+    private createLifelines(): LifeLines {
         const lifelines: Lifeline[] = []
         let offsetX = 0
+        let maxHeight = 0
     
         // push a fake left boundary
         lifelines.push({ x: 0, index: 0, spacing: new Map(), dimensions: new Dimensions(0, 0) })
@@ -159,17 +158,22 @@ export default class SequenceDiagramRenderer {
                 x: offsetX,
                 index: lifelines.length,
                 spacing: new Map(),
-                dimensions: new Dimensions(bbox.width, bbox.height)
+                dimensions: new Dimensions(bbox.width, bbox.height),
+                participant
             })
-                
+
+            maxHeight = Math.max(maxHeight, bbox.height)
             offsetX += bbox.width
         }
     
         // push a fake right boundary
-        lifelines.push({ x: 0, index: lifelines.length, spacing: new Map(), dimensions: new Dimensions(0, 0) })
+        lifelines.push({ x: offsetX, index: lifelines.length, spacing: new Map(), dimensions: new Dimensions(0, 0) })
     
         this.spaceLifeLines(lifelines)
-        return lifelines
+        return { 
+            lifelines,
+            maxHeight
+        }
     }
 
     private spaceLifeLines(lifelines: Lifeline[]) {
@@ -193,11 +197,19 @@ export default class SequenceDiagramRenderer {
     }
 }
 
+
+
+interface LifeLines {
+    lifelines: Lifeline[]
+    maxHeight: number
+}
+
 export interface Lifeline {
     x: number
     dimensions: Dimensions
     spacing: Map<number, number>
     index: number
+    participant?: Participant
 }
 
 export type SpacerFunc = {

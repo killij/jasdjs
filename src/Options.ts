@@ -64,7 +64,7 @@ type IconOptions = {
     paddingRight: number
 }
 
-type LifelineOptions = {
+export type LifelineOptions = {
     textBoxOptions: TextBoxOptions
     lineOptions: LineOptions
     iconOptions: IconOptions
