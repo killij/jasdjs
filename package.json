@@ -19,5 +19,14 @@
   "bugs": {
     "url": "https://github.com/cairnsj/jasdjs/issues"
   },
-  "homepage": "https://github.com/cairnsj/jasdjs#readme"
+  "homepage": "https://github.com/cairnsj/jasdjs#readme",
+  "devDependencies": {
+    "@types/node": "^20.9.1",
+    "typescript": "^5.2.2",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "@svgdotjs/svg.js": "^3.2.0"
+  }
 }
