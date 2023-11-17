@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 //
 
-import { G, SVG, Svg } from '@svgdotjs/svg.js'
+import { G, Marker, SVG, Svg } from '@svgdotjs/svg.js'
 import { SequenceDiagram } from "./SequenceDiagram"
 import { Renderer } from './Renderer'
 
@@ -13,7 +13,7 @@ import { Dimensions } from './Dimensions'
 import { TitleLayer } from './TitleLayer'
 import { LifelinesLayer } from './LifelinesLayer'
 import { MessagesLayer } from './MessagesLayer'
-import { drawText, drawTextBox } from './ElementRenderers'
+import { drawActor, drawText, drawTextBox } from './ElementRenderers'
 
 export interface BodyElementHandler<T> {
     layout(item: T, root: Lifeline, target: Lifeline, setSpacing: Spacer): Dimensions
@@ -89,15 +89,15 @@ export default class SequenceDiagramRenderer {
 
         for (const participant in this._diagram.participants) {
 
+            
+
+
             //const tb = drawTextBox(this._renderer.draw, "Github \n Actions in action", this._options.lifelines.textBoxOptions)
-
-
+            //const tb = drawActor(this._renderer.draw, "Developer", this._renderer.icons.actor, this._options.lifelines.textBoxOptions)
+            
+            
         }
         
-        
-
-
-
 
         // elements initial layout
 
@@ -110,6 +110,7 @@ export default class SequenceDiagramRenderer {
         // title transform
         // lifelines/elements transform
 
+        return
         let oX = this._options.padding
         let oY = this._options.padding
         const totalWidth = width;
@@ -141,14 +142,8 @@ export default class SequenceDiagramRenderer {
         }
 
         // move elements/lifelines
-        
-        
-        
     }
 }
-
-
-
 
 
 export interface Lifeline {

@@ -1,4 +1,4 @@
-import { G, Svg, Text } from "@svgdotjs/svg.js"
+import { G, Marker, Svg, Text } from "@svgdotjs/svg.js"
 import { Align, TextBoxOptions, TextOptions } from "./Options"
 
 const defaultColour = "#000"
@@ -58,6 +58,28 @@ export function drawTextBox(svg: Svg, text: string, options: TextBoxOptions): G 
             t.x(width - padding - bbox.width)
             break
     }
+
+    return g
+}
+
+export function drawActor(svg: Svg, text: string, icon: Marker, options: TextBoxOptions): G {
+    const { margin, padding, textOptions } = options
+
+    const doublePadding = 2 * padding
+    const doubleMargin = 2 * margin
+    const iconSpacing = 5
+
+    const g = svg.group()
+    const t = drawText(g, text, textOptions)
+    const textBbox = t.bbox()
+    const iconBbox = icon!.bbox()
+    
+    const width = Math.max(iconBbox.width, textBbox.width) + doublePadding + doubleMargin
+    const height = iconBbox.height + textBbox.height + doublePadding + doubleMargin + iconSpacing
+
+    g.use(icon!).x((width - iconBbox.width)/2).y(margin + padding)
+    t.cx(width / 2).y(height - margin - padding - textBbox.height)
+    g.rect(width, height).move(0,0).stroke("red").fill("none")
 
     return g
 }
