@@ -3,8 +3,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 //
 
-import { G, Marker, SVG, Svg } from '@svgdotjs/svg.js'
-import { SequenceDiagram } from "./SequenceDiagram"
+import { Box, G, Marker, SVG, Svg } from '@svgdotjs/svg.js'
+import { Participant, ParticipantTypes, SequenceDiagram } from "./SequenceDiagram"
 import { Renderer } from './Renderer'
 
 import { Options, DeepPartial, DiagramOptions, BackgroundPattern, Align, TextOptions, TextBoxOptions } from './Options'
@@ -84,33 +84,28 @@ export default class SequenceDiagramRenderer {
 
 
         // lifelines initial spacing
-
-        //const lifelines: Lifeline = []
-
-        for (const participant in this._diagram.participants) {
-
-            
-
-
-            //const tb = drawTextBox(this._renderer.draw, "Github \n Actions in action", this._options.lifelines.textBoxOptions)
-            //const tb = drawActor(this._renderer.draw, "Developer", this._renderer.icons.actor, this._options.lifelines.textBoxOptions)
-            
-            
-        }
-        
+        const lifelines = this.createLifelines()
+         
 
         // elements initial layout
 
         // lifelines finalise spacing
 
         // lifelines draw
+
+        // for (const lifeline of lifelines) {
+        //     const g = drawLifeline(this._renderer.draw, lifeline, this._options.lifelines)
+        // }
+
+
+
         // elements draw
 
         // title layout/draw
         // title transform
         // lifelines/elements transform
 
-        return
+
         let oX = this._options.padding
         let oY = this._options.padding
         const totalWidth = width;
@@ -143,8 +138,60 @@ export default class SequenceDiagramRenderer {
 
         // move elements/lifelines
     }
-}
 
+    private createLifelines(): Lifeline[] {
+        const lifelines: Lifeline[] = []
+        let offsetX = 0
+    
+        // push a fake left boundary
+        lifelines.push({ x: 0, index: 0, spacing: new Map(), dimensions: new Dimensions(0, 0) })
+    
+        for (const participant of this._diagram.participants) {
+            let el: G
+            switch (participant.type) {
+                case ParticipantTypes.lifeline: el = drawTextBox(this._renderer.draw, participant.alias, this._options.lifelines.textBoxOptions); break
+                case ParticipantTypes.actor: el = drawActor(this._renderer.draw, participant.alias, this._renderer.icons.actor, this._options.lifelines.textBoxOptions); break
+            }
+    
+            const bbox = el.bbox()
+            el.remove()
+            lifelines.push({
+                x: offsetX,
+                index: lifelines.length,
+                spacing: new Map(),
+                dimensions: new Dimensions(bbox.width, bbox.height)
+            })
+                
+            offsetX += bbox.width
+        }
+    
+        // push a fake right boundary
+        lifelines.push({ x: 0, index: lifelines.length, spacing: new Map(), dimensions: new Dimensions(0, 0) })
+    
+        this.spaceLifeLines(lifelines)
+        return lifelines
+    }
+
+    private spaceLifeLines(lifelines: Lifeline[]) {
+        for (let sourceIndex = 0; sourceIndex < lifelines.length; sourceIndex++) {
+            const sourceLayout = lifelines[sourceIndex]
+            const spacings = [...sourceLayout.spacing].sort()
+
+            for (const [targetIndex, width] of spacings) {
+                const targetLayout = lifelines[targetIndex]
+                const scx = sourceLayout.x + sourceLayout.dimensions.cx
+                const tcx = targetLayout.x + targetLayout.dimensions.cx
+                const diff = width - Math.abs(tcx - scx) 
+                if (diff > 0) {
+                    // nudge right
+                    for (let i = targetIndex; i < lifelines.length; i++) {
+                        lifelines.at(i)!.x += diff
+                    }
+                }
+            }
+        }
+    }
+}
 
 export interface Lifeline {
     x: number
@@ -163,3 +210,4 @@ export interface IDiagramLayer {
     finaliseLayout(layers: IDiagramLayer[]): void
     render(offsetX: number, offsetY: number): void
 }
+
