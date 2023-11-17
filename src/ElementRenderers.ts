@@ -79,7 +79,7 @@ export function drawActor(svg: Svg, text: string, icon: Marker, options: TextBox
 
     g.use(icon!).x((width - iconBbox.width)/2).y(margin + padding)
     t.cx(width / 2).y(height - margin - padding - textBbox.height)
-    g.rect(width, height).move(0,0).stroke("red").fill("none")
+    //g.rect(width, height).move(0,0).stroke("red").fill("none")
 
     return g
 }
