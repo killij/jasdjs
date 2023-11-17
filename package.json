@@ -27,6 +27,7 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "@svgdotjs/svg.js": "^3.2.0"
+    "@svgdotjs/svg.js": "^3.2.0",
+    "lodash.merge": "^4.6.2"
   }
 }

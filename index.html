@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>jasd.js</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap" rel="stylesheet" rel="preload" sy>
+    <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js"></script>
+<script>
+  WebFont.load({
+    google: {
+      families: ['Roboto']
+    }
+  });
+</script>
+  </head>
+  <body>
+    <style type="text/css" media="screen">
+      #editor { 
+          /* position: absolute; */
+          /* top: 0;
+          right: 0;
+          bottom: 0;
+          left: 0; */
+          height: 300px;
+      }
+      .jasd-note {
+        filter: drop-shadow(3px 5px 2px rgb(0 0 0 / 0.4));
+        color: red;
+      }
+  </style>
+  <div id="editor">title: "Release
+Process Into Production"
+
+actor: dev as Developer
+ll: gh as Github
+ll: gha as "Github
+Actions"
+ll: rc as "Release
+Channel"
+
+note over dev, gh: thing to do maybe here
+dev -&gt; gh: Commit
+gh --&gt;&gt; dev: Ok
+gh -&gt;&gt;+gha: "On commit
+to main"
+note right of gha: "Semantic
+Release"
+gha -&gt; gh: Perform release
+gha -&gt rc : Notify channels
+gh -&gt; gha: "On release"
+note right of gha: "Build docker image"
+gha -&gt; gha: "Complete the
+release process
+to the
+correct env"
+note over gha: "Auto deploy"
+
+//note over John, Jeff: What ever
+</div>
+    <div id="host"></div>
+   <script src="../dist/main.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.27.0/ace.js" integrity="sha512-7UWnxa401enUNZ8plgMQJz1EPcNhkPJxI3OsnzlDXsw6Y58hEZMNMSVnkkWAKyuSxtaAE0pss4KJAl5+D403gw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+   <script>
+
+var editor = ace.edit("editor");
+editor.setTheme("ace/theme/monokai");
+editor.getSession().setMode("ace/mode/asciidoc");
+editor.getSession().on('change', function() {
+  update()
+});
+//editor.session.setMode("ace/mode/javascript");
+
+function update() {
+  try {
+    const text = editor.getValue()
+    const diagram = jasdjs.Parse(text)
+    const container = document.getElementById("host")
+    const renderer = new jasdjs.SequenceDiagramRenderer(diagram, container, {
+      padding: 20,
+      title: {
+        paddingBottom: 0
+      },
+      lifelines: {
+        textBoxOptions: {
+          margin: 7
+        }
+      },
+      notes: {
+        textBoxOptions: {
+          margin: 7
+
+        }
+      },
+      background: {
+        pattern: {
+          width: 56,
+          height: 100,
+          func: (add) => {
+            add.rect(56, 100).fill('#fff')
+            add.path('M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100').fill('none').stroke('#f7f7f7').attr({"stroke-width": 2})
+            add.path('M28 0L28 34L0 50L0 84L28 100L56 84L56 50L28 34').fill('none').stroke('#fafafa').attr({"stroke-width": 2})
+          }
+        }
+
+        // pattern: {
+        //   width: 25,
+        //   height: 25,
+        //   func: (add) => {
+        //     add.rect(25, 25).fill('#777')
+        //     add.rect(1, 25).fill('#ccc').move(24,0)
+        //   }
+        // }
+      }
+    })
+    
+    renderer.render()
+    
+      //background: {
+        //color: "#b0d0d3",
+        // pattern: {
+        //   width: 56,
+        //   height: 100,
+        //   func: (add) => {
+        //     add.rect(56, 100).fill('#fff')
+        //     add.path('M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100').fill('none').stroke('#f7f7f7').attr({"stroke-width": 2})
+        //     add.path('M28 0L28 34L0 50L0 84L28 100L56 84L56 50L28 34').fill('none').stroke('#fafafa').attr({"stroke-width": 2})
+        //   }
+        // }
+        // pattern: {
+        //   width: 25,
+        //   height: 25,
+        //   func: (add) => {
+        //     add.rect(25, 25).fill('#fefefe')
+        //     add.rect(1, 25).fill('#eee').move(24,0)
+        //   }
+        // }
+
+        // pattern: {
+        //   width: 10,
+        //   height: 10,
+        //   func: (add) => {
+        //     add.rect(10, 10).fill('#fefefe')
+        //     add.rect(1, 1).fill('#ccc').move(9,9)
+        //   }
+        // }
+      
+  } catch (ex) {
+    console.error(ex)
+  }
+}
+
+update()
+   </script>
+   
+  </body>
+</html>
