@@ -14,7 +14,7 @@ export enum Align {
     right = 'right',
 }
 
-type TextAlignment = Align.left | Align.middle | Align.right
+type TextAlignment = keyof typeof Align
 
 type FontOptions = {
     family?: string

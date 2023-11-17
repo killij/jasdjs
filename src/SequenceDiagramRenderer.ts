@@ -3,16 +3,17 @@
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 //
 
-import { SVG } from '@svgdotjs/svg.js'
+import { G, SVG, Svg } from '@svgdotjs/svg.js'
 import { SequenceDiagram } from "./SequenceDiagram"
 import { Renderer } from './Renderer'
 
-import { Options, DeepPartial, DiagramOptions, BackgroundPattern, Align } from './Options'
+import { Options, DeepPartial, DiagramOptions, BackgroundPattern, Align, TextOptions } from './Options'
 
 import { Dimensions } from './Dimensions'
 import { TitleLayer } from './TitleLayer'
 import { LifelinesLayer } from './LifelinesLayer'
 import { MessagesLayer } from './MessagesLayer'
+import { renderTitle } from './ElementRenderers'
 
 export interface BodyElementHandler<T> {
     layout(item: T, root: Lifeline, target: Lifeline, setSpacing: Spacer): Dimensions
@@ -80,8 +81,59 @@ export default class SequenceDiagramRenderer {
         offsetY += lifelinesLayer.maxHeight
 
         messageLayer.render(this._options.padding, offsetY)
+
+
+        // lifelines initial spacing
+
+        // elements initial layout
+
+        // lifelines finalise spacing
+
+        // lifelines draw
+        // elements draw
+
+        // title layout/draw
+        // title transform
+        // lifelines/elements transform
+
+        let oX = this._options.padding
+        let oY = this._options.padding
+        const totalWidth = width;
+
+
+
+        if (this._diagram.title) {
+            // draw title
+            const g = renderTitle(
+                this._renderer.draw,
+                this._diagram.title,
+                this._options.title.textOptions)
+            
+            // move into position
+            switch (this._options.title.textOptions.align) {
+                case Align.left:
+                    g.transform({ translateX: oX, translateY: oY })
+                    break
+                case Align.middle:
+                    const titleCx = totalWidth / 2
+                    g.transform({ translateX: titleCx, translateY: oY })
+                    break
+                case Align.right:
+                    const titleX = totalWidth - this._options.padding
+                    g.transform({ translateX: titleX, translateY: oY })
+                    break
+            }
+
+            // update Y offset
+            oY += g.bbox().height + this._options.title.paddingBottom
+        }
+
+        // move elements/lifelines
+        
     }
 }
+
+
 
 export interface Lifeline {
     x: number
