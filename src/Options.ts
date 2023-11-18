@@ -14,25 +14,25 @@ export enum Align {
     right = 'right',
 }
 
-type TextAlignment = keyof typeof Align
+export type TextAlignment = keyof typeof Align
 
-type FontOptions = {
+export type FontOptions = {
     family?: string
     size?: number
     weight?: string
     fill?: string
 }
 
-type StrokeOptions = {
+export type StrokeOptions = {
     width: number,
     fill: string
 }
 
-type TextOptions = FontOptions & {
+export type TextOptions = FontOptions & {
     align?: TextAlignment
 }
 
-type TextBoxOptions = {
+export type TextBoxOptions = {
     fill?: string
     rounding?: number
     margin: number
@@ -42,23 +42,23 @@ type TextBoxOptions = {
     icon?: Marker
 }
 
-type LineOptions = {
+export type LineOptions = {
     fill: string
     width: number
     dashStyle?: string
     lineType?: ArrowLineTypes
 }
 
-type ArrowOptions = LineOptions & {
+export type ArrowOptions = LineOptions & {
     headType: ArrowHeadTypes
 }
 
-type TitleOptions = {
+export type TitleOptions = {
     textOptions: TextOptions
     paddingBottom: number
 }
 
-type IconOptions = {
+export type IconOptions = {
     height: number
     width: number
     paddingRight: number
@@ -70,7 +70,7 @@ export type LifelineOptions = {
     iconOptions: IconOptions
 }
 
-type MessageOptions = {
+export type MessageOptions = {
     fontOptions: FontOptions
     arrowOptions: ArrowOptions
     arrowSpace: number
@@ -79,12 +79,12 @@ type MessageOptions = {
     selfArrowWidth: number
 }
 
-type NoteOptions = {
+export type NoteOptions = {
     textBoxOptions: TextBoxOptions
     overlap: number
 }
 
-type BackgroundColor = {
+export type BackgroundColor = {
     color: string
 }
 
@@ -96,7 +96,7 @@ export type BackgroundPattern = {
     }
 }
 
-type DiagramOptions = {
+export type DiagramOptions = {
     padding: number
     title: TitleOptions
     messages: MessageOptions
@@ -105,9 +105,9 @@ type DiagramOptions = {
     background: BackgroundColor | BackgroundPattern | undefined
 }
 
-type DeepPartial<T> = Partial<{ [P in keyof T]: DeepPartial<T[P]> }>
+export type DeepPartial<T> = Partial<{ [P in keyof T]: DeepPartial<T[P]> }>
 
-class Options {
+export class Options {
     private static _defaultIconOptions: IconOptions = {
         width: 15,
         height: 15,
@@ -171,10 +171,10 @@ class Options {
     private static _defaultMessageOptions: MessageOptions = {
         fontOptions: this._defaultFontOptions,
         arrowOptions: this._defaultArrowOptions,
-        padding: 5,
+        padding: 3,
         arrowHeight: 8,
         selfArrowWidth: 30,
-        arrowSpace: 10,
+        arrowSpace: 5,
     }
     
     private static _defaultDiagramOptions: DiagramOptions = {
@@ -189,16 +189,4 @@ class Options {
     public static From(options: DeepPartial<DiagramOptions>): DiagramOptions {
         return merge({}, this._defaultDiagramOptions, options ?? {})
     }
-}
-
-export {
-    DeepPartial,
-    Options,
-    DiagramOptions,
-    TextOptions,
-    LineOptions,
-    ArrowOptions,
-    FontOptions,
-    TextBoxOptions,
-
 }

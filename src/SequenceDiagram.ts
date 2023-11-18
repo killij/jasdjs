@@ -83,13 +83,13 @@ export interface Participant {
     alias: string
 }
 
-export enum SegmentTypes {
+export enum ElementTypes {
     message = "message",
     note = "note"
 }
 
 export interface Message {
-    type: SegmentTypes.message
+    type: ElementTypes.message
     source: Participant
     target: Participant
     modifier?: string
@@ -98,7 +98,7 @@ export interface Message {
 }
 
 export interface Note {
-    type: SegmentTypes.note
+    type: ElementTypes.note
     location: NoteLocations
     target: Participant[]
     text: string
@@ -157,7 +157,7 @@ export default function Parse(input: string): SequenceDiagram {
                 const target = getOrAddParticipant(result, el.target, el.target)
 
                 result.elements.push({
-                    type: SegmentTypes.message,
+                    type: ElementTypes.message,
                     source,
                     target,
                     arrow: {
@@ -172,7 +172,7 @@ export default function Parse(input: string): SequenceDiagram {
             case AstElementTypes.note: {
                 const targets = el.target.map(x => getOrAddParticipant(result, x, x))
                 result.elements.push({
-                    type: SegmentTypes.note,
+                    type: ElementTypes.note,
                     location: el.location,
                     target: targets,
                     text: el.text

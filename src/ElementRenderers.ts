@@ -1,13 +1,13 @@
 import { G, Marker, Polyline, Svg, Text } from "@svgdotjs/svg.js"
-import { Align, LifelineOptions, LineOptions, TextBoxOptions, TextOptions } from "./Options"
+import { Align, ArrowOptions, LifelineOptions, LineOptions, MessageOptions, TextBoxOptions, TextOptions } from "./Options"
 import { Lifeline, Points } from "./SequenceDiagramRenderer"
-import { ArrowLineTypes, ParticipantTypes } from "./SequenceDiagram"
+import { ArrowLineTypes, Message, ParticipantTypes } from "./SequenceDiagram"
 
 const defaultColour = "#000"
 const defaultContrastColour = "#fff"
 
 export function drawText(svg: Svg | G, text: string, textOptions: TextOptions): Text {
-    const t = svg.text(text).move(0, 0)
+    const t = svg.text(text)
     const { align, ...fontOptions } = textOptions
     t.font(fontOptions)
     
@@ -113,7 +113,8 @@ export function drawLifeline(svg: Svg | G, lifeline: Lifeline, height: number, i
     let top: G
     switch (lifeline.participant!.type) {
         case ParticipantTypes.lifeline: top = drawTextBox(group, participant.alias, options.textBoxOptions); break
-        case ParticipantTypes.actor: top = drawActor(group, participant.alias, icon, options.textBoxOptions); break
+        case ParticipantTypes.actor: top = drawTextBox(group, participant.alias, options.textBoxOptions); break
+        //case ParticipantTypes.actor: top = drawActor(group, participant.alias, icon, options.textBoxOptions); break
     }
 
     const bbox = top.bbox()
@@ -123,6 +124,65 @@ export function drawLifeline(svg: Svg | G, lifeline: Lifeline, height: number, i
 
     const line = drawLine(group, [[bbox.cx, bbox.cy], [bbox.cx, bbox.cy + height + bbox.height]], options.lineOptions)
     line.back()
+
+    //group.rect(group.bbox().width, group.bbox().height).fill("none").stroke("green").move(0,0).front()
+    return group
+}
+
+export function drawArrow(svg: Svg | G, markers: any, path: Points, options: ArrowOptions) {
+    const group = svg.group()
+    const { headType, ...lineOptions } = options
+    const polyline = drawLine(group, path, lineOptions)
+    polyline.marker('end', markers[headType])
+    return group
+}
+
+export function drawMessage(svg: Svg | G, markers: any, message: Message, source: Lifeline, target: Lifeline, options: MessageOptions): G {
+    const { fontOptions, padding, arrowOptions, arrowSpace, arrowHeight } = options
+    const { arrow: { head, line } } = message
     
+    const group = svg.group().move(0, 0)
+    let scx = source.x + source.dimensions.cx
+    let tcx = target.x + target.dimensions.cx
+    const mincx = Math.min(scx, tcx)
+    scx -= mincx
+    tcx -= mincx
+
+    const width = Math.abs(scx - tcx)
+    const text = drawText(group, message.text, { align: Align.middle, ...fontOptions })
+    text.move(0,0).y(padding).cx(width / 2)
+
+    const arrowY = text.bbox().height + padding + arrowSpace
+    drawArrow(group, markers, [[scx, arrowY], [tcx, arrowY]], {
+        ...arrowOptions, lineType: line, headType: head
+    })
+
+    const tbbox = text.bbox()
+    group.rect(width, tbbox.height + arrowHeight + arrowSpace + (2 * padding)).fill("none").stroke("none").move(0, 0).back()
+    return group
+}
+
+export function drawSelfMessage(svg: Svg | G, markers: any, message: Message, source: Lifeline, options: MessageOptions): G {
+    const { fontOptions, padding, arrowOptions, selfArrowWidth, arrowHeight } = options
+    const { arrow: { head, line } } = message
+
+    const group = svg.group()
+    const halfArrowWidth = arrowHeight / 2
+    const text = drawText(group, message.text, { align: Align.left, ...fontOptions })
+    
+    text.move(0,0).translate(selfArrowWidth + padding, padding)
+
+    const arrowY = padding
+    const points: Points = [
+        [0, arrowY + halfArrowWidth],
+        [selfArrowWidth, arrowY + halfArrowWidth],
+        [selfArrowWidth, arrowY + text.bbox().height - halfArrowWidth],
+        [0, arrowY + text.bbox().height - halfArrowWidth]
+    ]
+    
+    drawArrow(group, markers, points, { ...arrowOptions, lineType: line, headType: head })
+
+    const tbbox = text.bbox()
+    group.rect(tbbox.width + selfArrowWidth + halfArrowWidth, tbbox.height + 2 * padding).fill("none").stroke("none").move(0, 0).front()
     return group
 }

@@ -27,6 +27,8 @@ class Renderer {
     private _icons: any = {}
     private _markers: any = {}
 
+    public get markers() { return this._markers }
+
     public get draw () { return this._draw }
 
     constructor(draw: Svg) {
