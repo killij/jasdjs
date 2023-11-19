@@ -8,6 +8,9 @@ import { ArrowHeadTypes, ArrowLineTypes } from "./SequenceDiagram"
 import { G, Marker, Svg } from "@svgdotjs/svg.js"
 import { Pattern } from "@svgdotjs/svg.js"
 
+export const defaultColour = "#000"
+export const defaultContrastColour = "#fff"
+
 export enum Align {
     middle = 'middle',
     left = 'left',

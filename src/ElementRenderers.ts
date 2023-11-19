@@ -4,12 +4,9 @@
 //
 
 import { G, Marker, Polyline, Svg, Text } from "@svgdotjs/svg.js"
-import { Align, ArrowOptions, LifelineOptions, LineOptions, MessageOptions, TextBoxOptions, TextOptions } from "./Options"
+import { Align, ArrowOptions, LifelineOptions, LineOptions, MessageOptions, TextBoxOptions, TextOptions, defaultColour, defaultContrastColour } from "./Options"
 import { Lifeline, Points } from "./SequenceDiagramRenderer"
 import { ArrowLineTypes, Message, ParticipantTypes } from "./SequenceDiagram"
-
-const defaultColour = "#000"
-const defaultContrastColour = "#fff"
 
 export function drawText(svg: Svg | G, text: string, textOptions: TextOptions): Text {
     const t = svg.text(text)
