@@ -198,6 +198,7 @@ export default class SequenceDiagramRenderer {
                         case NoteLocations.leftOf:
                             this._options.notes.textBoxOptions.textOptions.align = Align.right
                             const leftOfNote = drawTextBox(group, element.text, this._options.notes.textBoxOptions).move(0,0)
+                            leftOfNote.addClass("jasd-note")
                             
                             leftOfNote.translate(noteSource.x + noteSource.dimensions.cx - leftOfNote.bbox().width, offsetY)
                             offsetY += leftOfNote.bbox().height ?? 0
@@ -210,6 +211,7 @@ export default class SequenceDiagramRenderer {
                                 : participantMap.get(element.target[1])!
                             const minimumWidth = Math.abs(source.x + source.dimensions.cx - (target.x + target.dimensions.cx)) + 2 * this._options.notes.textBoxOptions.margin
                             const overNote = drawTextBox(group, element.text, this._options.notes.textBoxOptions, minimumWidth).move(0,0)
+                            overNote.addClass("jasd-note")
 
                             if (element.target.length === 1) {
                                 overNote.y(offsetY)
@@ -217,14 +219,13 @@ export default class SequenceDiagramRenderer {
                             } else {
                                 const left = source.x < target.x ? source : target
                                 overNote.translate(left.x + left.dimensions.cx - this._options.notes.overlap, offsetY)
-                                overNote.addClass("jasd-over-note")
                             }
                             offsetY += overNote.bbox().height ?? 0
                             break
                         case NoteLocations.rightOf:
                             this._options.notes.textBoxOptions.textOptions.align = Align.left
                             const rightOfNote = drawTextBox(group, element.text, this._options.notes.textBoxOptions).move(0,0)
-                            
+                            rightOfNote.addClass("jasd-note")
                             rightOfNote.translate(noteSource.x + noteSource.dimensions.cx, offsetY)
                             offsetY += rightOfNote.bbox().height ?? 0
                             break
@@ -261,6 +262,13 @@ export default class SequenceDiagramRenderer {
             const pattern = this._renderer.draw.pattern(w, h, func)
             this._renderer.draw.rect(diagramWidth, diagramHeight).fill(pattern).back()
         }
+        //this._renderer.draw.svg
+
+        if (this._options.background && typeof this._options.background === 'function') {
+            const bgGroup = this._options.background(this._renderer.draw, diagramWidth, diagramHeight)
+            this._renderer.draw.add(bgGroup)
+            bgGroup.back()
+        }
     }
 
     render() {
@@ -280,7 +288,6 @@ export default class SequenceDiagramRenderer {
         const diagramWidth = lifelines.at(-1)!.x + 2 * this._options.padding
         let offsetX = this._options.padding
         let offsetY = this._options.padding
-        
 
         // title draw
         if (this._diagram.title) {
@@ -294,10 +301,10 @@ export default class SequenceDiagramRenderer {
         
         // resize diagram
         const diagramHeight = offsetY + lifelinesGroup.bbox().height + this._options.padding
-        this._renderer.resize(diagramWidth, diagramHeight)
+        this._renderer.draw.size(diagramWidth, diagramHeight)
 
         // draw background
         this.renderBackground(diagramWidth, diagramHeight)
-        
+        //this._renderer.draw.group().op
     }  
 }

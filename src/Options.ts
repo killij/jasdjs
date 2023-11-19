@@ -5,7 +5,7 @@
 
 import merge from "lodash.merge"
 import { ArrowHeadTypes, ArrowLineTypes } from "./SequenceDiagram"
-import { Marker } from "@svgdotjs/svg.js"
+import { G, Marker, Svg } from "@svgdotjs/svg.js"
 import { Pattern } from "@svgdotjs/svg.js"
 
 export enum Align {
@@ -96,13 +96,15 @@ export type BackgroundPattern = {
     }
 }
 
+export type BackgroundCallback = (svg: Svg, width: number, height: number) => G
+
 export type DiagramOptions = {
     padding: number
     title: TitleOptions
     messages: MessageOptions
     lifelines: LifelineOptions
     notes: NoteOptions
-    background: BackgroundColor | BackgroundPattern | undefined
+    background: BackgroundColor | BackgroundPattern | BackgroundCallback | undefined
 }
 
 export type DeepPartial<T> = Partial<{ [P in keyof T]: DeepPartial<T[P]> }>
@@ -147,7 +149,7 @@ export class Options {
 
     private static _defaultTitleOptions: TitleOptions = {
         paddingBottom: 20,
-        textOptions: Object.assign({ align: Align.left, ...this._defaultFontOptions }, { size: 18 })
+        textOptions: Object.assign({ align: Align.right, ...this._defaultFontOptions }, { size: 18 })
     }
 
     private static _defaultLineOptions: LineOptions = {
