@@ -3,31 +3,30 @@
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 //
 
-import { Box, G, Marker, Polyline, SVG, Svg } from '@svgdotjs/svg.js'
-import { Participant, ParticipantTypes, ElementTypes, SequenceDiagram, NoteLocations, Message } from "./SequenceDiagram"
+import { G, SVG } from '@svgdotjs/svg.js'
+import { Participant, ParticipantTypes, ElementTypes, SequenceDiagram, NoteLocations } from "./SequenceDiagram"
 import { Renderer } from './Renderer'
-
-import { Options, DeepPartial, DiagramOptions, BackgroundPattern, Align, TextOptions, TextBoxOptions, LifelineOptions, LineOptions, MessageOptions, ArrowOptions } from './Options'
-
+import { Options, DeepPartial, DiagramOptions, BackgroundPattern, Align } from './Options'
 import { Dimensions } from './Dimensions'
-import { TitleLayer } from './TitleLayer'
-import { LifelinesLayer } from './LifelinesLayer'
-import { MessagesLayer } from './MessagesLayer'
-import { drawActor, drawArrow, drawLifeline, drawLine, drawMessage, drawSelfMessage, drawText, drawTextBox } from './ElementRenderers'
+import { drawLifeline, drawMessage, drawSelfMessage, drawText, drawTextBox } from './ElementRenderers'
 import { sizeMessage, sizeSelfMessage } from './ElementSizers'
-
-export interface BodyElementHandler<T> {
-    layout(item: T, root: Lifeline, target: Lifeline, setSpacing: Spacer): Dimensions
-    render(offsetX: number, item: T, root: Lifeline, target: Lifeline, y: number, dimensions: Dimensions): void
-}
-
-export interface Spacer {
-    (left: number, right: number, width: number): void
-}
 
 type Point = [number, number]
 
 export type Points = Point[]
+
+interface LifeLines {
+    lifelines: Lifeline[]
+    maxHeight: number
+}
+
+export interface Lifeline {
+    x: number
+    dimensions: Dimensions
+    spacing: Map<number, number>
+    index: number
+    participant?: Participant
+}
 
 export default class SequenceDiagramRenderer {
     private _options: DiagramOptions
@@ -49,58 +48,6 @@ export default class SequenceDiagramRenderer {
     }
 
     render() {
-        const { padding } = this._options
-        const titleLayer = new TitleLayer(this._renderer, this._diagram, this._options)
-        const lifelinesLayer = new LifelinesLayer(this._renderer, this._diagram, this._options)
-        const messageLayer = new MessagesLayer(this._renderer, this._diagram, this._options)
-        const layers: IDiagramLayer[] = [titleLayer, lifelinesLayer, messageLayer]
-
-        for (const layer of layers) {
-            layer.calculateLayout(layers)
-        }
-
-        console.log(lifelinesLayer.lifelines)
-
-        for (const layer of layers) {
-            layer.finaliseLayout(layers)            
-        }
-
-        let height = 2 * padding + titleLayer.dimensions.height + 2 * lifelinesLayer.maxHeight + messageLayer.dimensions.height
-        let width = Math.max(titleLayer.dimensions.width, lifelinesLayer.dimensions.width) + 2 * padding
-        this._renderer.resize(width + 200, height + 200)
-
-        const backgroundPattern = this._options.background as BackgroundPattern
-        if (backgroundPattern && typeof backgroundPattern.pattern?.func === 'function') {
-            const { pattern: { width: w, height: h, func } } = backgroundPattern
-            const pattern = this._renderer.draw.pattern(w, h, func)
-            this._renderer.draw.rect(width, height).fill(pattern)
-        }
-
-        let offsetY = this._options.padding
-        //titleLayer.render(this._options.padding, offsetY)
-        offsetY += titleLayer.dimensions.height
-
-        //lifelinesLayer.render(this._options.padding, offsetY)
-        offsetY += lifelinesLayer.maxHeight
-
-        //messageLayer.render(this._options.padding, offsetY)
-        
-        console.log(lifelinesLayer.lifelines)
-
-
-        // ==========================================================================================
-        // ==========================================================================================
-        // ==========================================================================================
-        // ==========================================================================================
-        // ==========================================================================================
-        // ==========================================================================================
-        // ==========================================================================================
-        // ==========================================================================================
-        // ==========================================================================================
-        // ==========================================================================================
-        // ==========================================================================================
-
-
         // lifelines initial spacing
         const { lifelines, maxHeight } = this.createLifelines()
 
@@ -111,8 +58,6 @@ export default class SequenceDiagramRenderer {
 
         let eX = 0
         let eY = 0
-        const elementDimensions = new Map()
-        console.log("ll -1", JSON.stringify(lifelines, null, 4))
 
         // elements initial layout
         for (const element of this._diagram.elements) {
@@ -122,58 +67,59 @@ export default class SequenceDiagramRenderer {
                     const d = isSelfMessage
                         ? sizeSelfMessage(this._renderer.draw, element.text, this._options)
                         : sizeMessage(this._renderer.draw, element.text, this._options)
-                    elementDimensions.set(element, d)
+
                     if (isSelfMessage) {
-                        setSpacing(lifelines, participantMap.get(element.source)!.index, participantMap.get(element.target)!.index + 1, d.width)
+                        SequenceDiagramRenderer.setSpacing(lifelines, participantMap.get(element.source)!.index, participantMap.get(element.target)!.index + 1, d.width)
                     } else {
-                        setSpacing(lifelines, participantMap.get(element.source)!.index, participantMap.get(element.target)!.index, d.width)
+                        SequenceDiagramRenderer.setSpacing(lifelines, participantMap.get(element.source)!.index, participantMap.get(element.target)!.index, d.width)
                     }
                     eY += d.height
                     break
                 case ElementTypes.note:
-                    // const { overlap, textBoxOptions: { textOptions: { align, ...fontOptions }, padding, margin } } = this._options.notes
-                    // const bbox = this._renderer.getTextBBox(element.text, fontOptions)
-                    // const space = 2 * (margin + padding)
-                    // const dimensions = new Dimensions(bbox.width + space, bbox.height + space)
+                    const { overlap, textBoxOptions: { textOptions: { align, ...fontOptions }, padding, margin } } = this._options.notes
+                    const note = drawTextBox(this._renderer.draw, element.text, this._options.notes.textBoxOptions).move(0,0)
+                    const noteBbox = note.bbox()
+                    note.remove()
+                    
+                    let sourceIndex = -1
+                    switch (element.location) {
+                        case (NoteLocations.leftOf):
+                            sourceIndex = participantMap.get(element.target[0])!.index
+                            SequenceDiagramRenderer.setSpacing(lifelines, sourceIndex, sourceIndex - 1, noteBbox.width)
+                            break;
+                        case (NoteLocations.rightOf):
+                            sourceIndex = participantMap.get(element.target[0])!.index
+                            SequenceDiagramRenderer.setSpacing(lifelines, sourceIndex, sourceIndex + 1, noteBbox.width)
+                            break;
+                        case (NoteLocations.over):
+                            sourceIndex = participantMap.get(element.target[0])!.index
+                            let targetIndex = sourceIndex
+                            if (element.target.length === 1) {
+                                SequenceDiagramRenderer.setSpacing(lifelines, targetIndex-1, targetIndex, noteBbox.width / 2)
+                                SequenceDiagramRenderer.setSpacing(lifelines, targetIndex, targetIndex+1, noteBbox.width / 2)
+                            } else {
+                                targetIndex = participantMap.get(element.target[1])!.index
+                                SequenceDiagramRenderer.setSpacing(lifelines, sourceIndex, targetIndex, noteBbox.width - 2 * overlap)
+                            }
+                            break;
+                    }
 
-                    // let sourceIndex = -1
-                    // switch (element.location) {
-                    //     case (NoteLocations.leftOf):
-                    //         sourceIndex = participantMap.get(element.target[0])!.index
-                    //         setSpacing(lifelines, sourceIndex, sourceIndex - 1, dimensions.width)
-                    //         break;
-                    //     case (NoteLocations.rightOf):
-                    //         sourceIndex = participantMap.get(element.target[0])!.index
-                    //         setSpacing(lifelines, sourceIndex, sourceIndex + 1, dimensions.width)
-                    //         break;
-                    //     case (NoteLocations.over):
-                    //         sourceIndex = participantMap.get(element.target[0])!.index
-                    //         let targetIndex = sourceIndex
-                    //         if (element.target.length === 1) {
-                    //             setSpacing(lifelines, sourceIndex-1, targetIndex-1, dimensions.width / 2)
-                    //             setSpacing(lifelines, sourceIndex, targetIndex, dimensions.width / 2)
-                    //         } else {
-                    //             targetIndex = participantMap.get(element.target[1])!.index
-                    //             setSpacing(lifelines, sourceIndex, targetIndex, dimensions.width - 2 * overlap)
-                    //         }
-                    //         break;
-                    // }
-                    // eY += dimensions.height
+                    eY += noteBbox.height
                     break
             }
         }
         
-        console.log("ll 0", JSON.stringify(lifelines, null, 4))
         // lifelines finalise spacing
-        this.spaceLifeLines(lifelines)
+        SequenceDiagramRenderer.spaceLifeLines(lifelines)
 
         // lifelines draw
         const lifelinesGroup = this._renderer.draw.group()
+
         for (const lifeline of lifelines.slice(1, lifelines.length - 1)) {
             const lifelineGroup = drawLifeline(lifelinesGroup, lifeline, eY, this._renderer.icons.actor, this._options.lifelines)
             lifelineGroup.translate(lifeline.x, maxHeight - lifelineGroup.children()[1].bbox().height)
         }
-        //lifelinesGroup.rect(lifelinesGroup.bbox().width, lifelinesGroup.bbox().height).fill("none").stroke("green").move(0,0).front()
+        lifelinesGroup.rect(1, 1).fill("none").stroke("none").move(0,0).front()
 
         // elements draw
         const messagesGroup = this._renderer.draw.group()
@@ -192,20 +138,58 @@ export default class SequenceDiagramRenderer {
                     message.translate(left.x + left.dimensions.cx, elY)
                     
                     // debug
-                    //message.rect(message.bbox().width, message.bbox().height).move(0,0).fill("none").stroke("red")
+                    //message.rect(message.bbox().width, message.bbox().height).move(0,0).fill("none").stroke("none")
                     
                     elY += message.bbox().height
                     break
                 case ElementTypes.note:
+                    const noteSource = participantMap.get(element.target[0])!
+
+                    switch (element.location) {
+                        case NoteLocations.leftOf:
+                            this._options.notes.textBoxOptions.textOptions.align = Align.right
+                            const leftOfNote = drawTextBox(messagesGroup, element.text, this._options.notes.textBoxOptions).move(0,0)
+                            
+                            leftOfNote.translate(noteSource.x + noteSource.dimensions.cx - leftOfNote.bbox().width, elY)
+                            elY += leftOfNote.bbox().height ?? 0
+                            break
+                        case NoteLocations.over:
+                            this._options.notes.textBoxOptions.textOptions.align = Align.middle
+                            const source = participantMap.get(element.target[0])!
+                            const target = element.target.length === 1
+                                ? source
+                                : participantMap.get(element.target[1])!
+                            const minimumWidth = Math.abs(source.x + source.dimensions.cx - (target.x + target.dimensions.cx)) + 2 * this._options.notes.textBoxOptions.margin
+                            const overNote = drawTextBox(messagesGroup, element.text, this._options.notes.textBoxOptions, minimumWidth).move(0,0)
+
+                            if (element.target.length === 1) {
+                                overNote.y(elY)
+                                overNote.cx(source.x + source.dimensions.cx)
+                            } else {
+                                const left = source.x < target.x ? source : target
+                                overNote.translate(left.x + left.dimensions.cx - this._options.notes.overlap, elY)
+                                overNote.addClass("jasd-over-note")
+                            }
+                            elY += overNote.bbox().height ?? 0
+                            break
+                        case NoteLocations.rightOf:
+                            this._options.notes.textBoxOptions.textOptions.align = Align.left
+                            const rightOfNote = drawTextBox(messagesGroup, element.text, this._options.notes.textBoxOptions).move(0,0)
+                            
+                            rightOfNote.translate(noteSource.x + noteSource.dimensions.cx, elY)
+                            elY += rightOfNote.bbox().height ?? 0
+                            break
+                    }
                     break
             }
         }
         
         // title layout/draw
         // title transform
+        const diagramWidth = lifelines.at(-1)!.x + 2 * this._options.padding
         let oX = this._options.padding
         let oY = this._options.padding
-        const totalWidth = width;
+        const totalWidth = diagramWidth;
 
         if (this._diagram.title) {
             // draw title
@@ -237,8 +221,17 @@ export default class SequenceDiagramRenderer {
         // lifelines/elements transform
         lifelinesGroup.move(oX, oY)
         messagesGroup.move(oX, oY + maxHeight)
-        console.log("ll 1", JSON.stringify(lifelines, null, 4))
-        console.log("ll 1", lifelines)
+        
+        // resize diagram and draw background
+        const diagramHeight = oY + lifelinesGroup.bbox().height + this._options.padding
+        this._renderer.resize(diagramWidth, diagramHeight)
+
+        const backgroundPattern = this._options.background as BackgroundPattern
+        if (backgroundPattern && typeof backgroundPattern.pattern?.func === 'function') {
+            const { pattern: { width: w, height: h, func } } = backgroundPattern
+            const pattern = this._renderer.draw.pattern(w, h, func)
+            this._renderer.draw.rect(diagramWidth, diagramHeight).fill(pattern).back()
+        }
     }
 
     private createLifelines(): LifeLines {
@@ -274,14 +267,14 @@ export default class SequenceDiagramRenderer {
         // push a fake right boundary
         lifelines.push({ x: offsetX, index: lifelines.length, spacing: new Map(), dimensions: new Dimensions(0, 0) })
     
-        this.spaceLifeLines(lifelines)
+        SequenceDiagramRenderer.spaceLifeLines(lifelines)
         return { 
             lifelines,
             maxHeight
         }
     }
 
-    private spaceLifeLines(lifelines: Lifeline[]) {
+    private static spaceLifeLines(lifelines: Lifeline[]) {
         for (let sourceIndex = 0; sourceIndex < lifelines.length; sourceIndex++) {
             const sourceLayout = lifelines[sourceIndex]
             const spacings = [...sourceLayout.spacing].sort()
@@ -300,39 +293,13 @@ export default class SequenceDiagramRenderer {
             }
         }
     }
-}
 
-
-
-function setSpacing(lifelines: Lifeline[], sourceIndex: number, targetIndex: number, width: number) {
-    const leftIndex = Math.min(sourceIndex, targetIndex)
-    const rightIndex = Math.max(sourceIndex, targetIndex)
-    const left = lifelines[leftIndex]
-    if (width > (left.spacing.get(rightIndex) ?? 0)) {
-        left.spacing.set(rightIndex, width)
-    }
-}
-
-interface LifeLines {
-    lifelines: Lifeline[]
-    maxHeight: number
-}
-
-export interface Lifeline {
-    x: number
-    dimensions: Dimensions
-    spacing: Map<number, number>
-    index: number
-    participant?: Participant
-}
-
-export type SpacerFunc = {
-    (leftIndex: number, rightIndex: number, width: number): void
-}
-
-export interface IDiagramLayer {
-    dimensions: Dimensions
-    calculateLayout(dependencies: IDiagramLayer[]): void
-    finaliseLayout(layers: IDiagramLayer[]): void
-    render(offsetX: number, offsetY: number): void
+    private static setSpacing(lifelines: Lifeline[], sourceIndex: number, targetIndex: number, width: number) {
+        const leftIndex = Math.min(sourceIndex, targetIndex)
+        const rightIndex = Math.max(sourceIndex, targetIndex)
+        const left = lifelines[leftIndex]
+        if (width > (left.spacing.get(rightIndex) ?? 0)) {
+            left.spacing.set(rightIndex, width)
+        }
+    }   
 }

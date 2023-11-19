@@ -1,3 +1,8 @@
+//
+// Copyright (c) James Killick and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for details.
+//
+
 import { G, Marker, Polyline, Svg, Text } from "@svgdotjs/svg.js"
 import { Align, ArrowOptions, LifelineOptions, LineOptions, MessageOptions, TextBoxOptions, TextOptions } from "./Options"
 import { Lifeline, Points } from "./SequenceDiagramRenderer"
@@ -45,8 +50,8 @@ export function drawLine(svg: Svg | G, path: Points, options: LineOptions): Poly
     return line
 }
 
-export function drawTextBox(svg: Svg | G, text: string, options: TextBoxOptions): G {
-    const { margin, padding, fill, rounding, textOptions, icon, strokeOptions: { width: strokeWidth, fill: stroke } } = options
+export function drawTextBox(svg: Svg | G, text: string, options: TextBoxOptions, minimumWidth?: number): G {
+    const { margin, padding, fill, rounding, textOptions, strokeOptions: { width: strokeWidth, fill: stroke } } = options
 
     const doublePadding = 2 * padding
     const doubleMargin = 2 * margin
@@ -54,7 +59,10 @@ export function drawTextBox(svg: Svg | G, text: string, options: TextBoxOptions)
     const group = svg.group()
     const _text = drawText(group, text, textOptions)
     const bbox = _text.bbox()
-    const width = bbox.width + doublePadding
+
+    const targetWidth = Math.max(minimumWidth ?? 0, bbox.width)
+
+    const width = targetWidth + doublePadding
     const height = bbox.height + doublePadding
     
     const invisibleRect = group.rect(width + doubleMargin, height + doublePadding).move(0,0).stroke("none").fill("none")
@@ -77,7 +85,7 @@ export function drawTextBox(svg: Svg | G, text: string, options: TextBoxOptions)
             _text.cx((width + doubleMargin)/2)
             break
         case Align.right:
-            _text.x(width - padding - bbox.width)
+            _text.x(width - bbox.width)
             break
     }
 
