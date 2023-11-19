@@ -3,6 +3,7 @@ window.talentLogo = function(draw, width, height) {
     group.attr({ "jasd-bg": "background"})
 
     const patternFunc = (add) => {
+        // attr: https://philiprogers.com/svgpatterns/#honeycomb
         add.rect(56, 100).fill('#fff')
         add.path('M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100').fill('none').stroke('#f7f7f7').attr({"stroke-width": 2})
         add.path('M28 0L28 34L0 50L0 84L28 100L56 84L56 50L28 34').fill('none').stroke('#fafafa').attr({"stroke-width": 2})
