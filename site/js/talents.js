@@ -1,11 +1,24 @@
 window.talentLogo = function(draw, width, height) {
     const group = draw.group()
+    group.attr({ "jasd-bg": "background"})
+
+    const patternFunc = (add) => {
+        add.rect(56, 100).fill('#fff')
+        add.path('M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100').fill('none').stroke('#f7f7f7').attr({"stroke-width": 2})
+        add.path('M28 0L28 34L0 50L0 84L28 100L56 84L56 50L28 34').fill('none').stroke('#fafafa').attr({"stroke-width": 2})
+    }
+
+    const pattern = draw.pattern(56, 100, patternFunc)
+    group.rect(width, height).fill(pattern).move(0,0).back()
+
+    const logoGroup = group.group()
+
     draw.style(".st0", { fill: "#101920"})
     draw.style(".st1", { fill: "#FFFFFF"})
     draw.style(".st2", { fill: "#00AFCE"})
     draw.style(".st3", { fill: "none"})
 
-    const tGroup = group.group()
+    const tGroup = logoGroup.group()
     tGroup.path("M340.7,104.6c-5.7,0-8.8-3.3-8.8-9.6V65.4h13.4l3.6-12.7h-17V39.1l-14.8,4.3v52c0,14.1,7.9,21.5,21.8,21.5c5.3,0,10.7-1.4,14.2-4.3L349,102C346.7,103.8,343.8,104.6,340.7,104.6z").addClass("st0")
     tGroup.path("M134.7,78.7v37.4H123l-2.2-7.8c-3.6,5.5-10.4,8.6-19.9,8.6c-14.5,0-23.6-8-23.6-19.1c0-10.6,7.1-19,26.3-19h16.4v-1c0-8.7-5.2-13.9-15.8-13.9c-7.1,0-14.5,2.4-19.2,6.3l-5.8-10.9c6.8-5.3,16.6-7.9,26.8-7.9C124.2,51.5,134.7,60.3,134.7,78.7z M119.9,96.1v-7.4h-15.3c-10.1,0-12.8,3.8-12.8,8.5c0,5.4,4.5,8.8,12.1,8.8C111.1,106,117.4,102.7,119.9,96.1z").addClass("st0")
     tGroup.path("M234.3,88.9h-49.7c1.8,9.3,9.5,15.3,20.5,15.3c7.1,0,12.7-2.3,17.2-6.9l7.9,9.2c-5.7,6.8-14.6,10.4-25.5,10.4c-21.2,0-35-13.7-35-32.7s13.9-32.6,32.7-32.6c18.5,0,32,13,32,33C234.5,85.7,234.4,87.5,234.3,88.9z M184.4,79h35.9c-1.2-9.2-8.2-15.5-17.9-15.5C192.9,63.5,185.9,69.7,184.4,79z").addClass("st0")
@@ -14,7 +27,7 @@ window.talentLogo = function(draw, width, height) {
     tGroup.polygon("28.3,30.7 24.7,43.4 51.2,43.4 51.2,116.1 66.1,116.1 66.1,30.7").addClass("st0")
     tGroup.path("M279.5,51.5c-9.2,0-17,3.1-21.8,9l-2-6.9l-12.1,3.5v59h14.8V83.8c0-12.8,7.1-19.2,17.7-19.2c9.5,0,15.1,5.5,15.1,16.9v34.6h14.8V79.5C305.9,60.3,294.7,51.5,279.5,51.5z").addClass("st0")
 
-    const cGroup = group.group()
+    const cGroup = logoGroup.group()
     cGroup.path("M784.5,104.6c-5.7,0-8.8-3.3-8.8-9.6V65.4h13.4l3.6-12.7h-17V39.1L761,43.4v52c0,14.1,7.9,21.5,21.8,21.5c5.3,0,10.7-1.4,14.2-4.3l-4.2-10.6C790.6,103.8,787.6,104.6,784.5,104.6z").addClass("st2")
     cGroup.path("M563.4,51.5c-9.2,0-17,3.1-21.8,9l-2-6.9l-12.1,3.5v59h14.8V83.8c0-12.8,7.1-19.2,17.7-19.2c9.5,0,15.1,5.5,15.1,16.9v34.6h14.8V79.5C589.8,60.3,578.5,51.5,563.4,51.5z").addClass("st2")
     cGroup.path("M866.1,51.5c-9.2,0-17,3.1-21.8,9l-2-6.9l-12.1,3.5v59H845V83.8c0-12.8,7.1-19.2,17.7-19.2c9.5,0,15.1,5.5,15.1,16.9v34.6h14.8V79.5C892.6,60.3,881.3,51.5,866.1,51.5z").addClass("st2")
@@ -31,8 +44,8 @@ window.talentLogo = function(draw, width, height) {
     const targetWidth = width * scaleFactor
     const calculatedScaleFactor = targetWidth / group.bbox().width
 
-    group.cx(width / 2)
-    group.cy(height / 2)
-    group.scale(calculatedScaleFactor, calculatedScaleFactor).opacity(0.1)
+    logoGroup.cx(width / 2)
+    logoGroup.cy(height / 2)
+    logoGroup.scale(calculatedScaleFactor, calculatedScaleFactor).opacity(0.15)
     return group
 }
