@@ -6,7 +6,7 @@
 import { Svg } from "@svgdotjs/svg.js";
 import { Dimensions } from "./Dimensions";
 import { drawText } from "./ElementRenderers";
-import { Align, DiagramOptions } from "./Options";
+import { Align, DiagramOptions, TextBoxOptions } from "./Options";
 
 export function sizeMessage(svg: Svg, text: string, options: DiagramOptions) {
     const { messages: { fontOptions, arrowHeight, padding, arrowSpace } } = options
@@ -31,5 +31,20 @@ export function sizeSelfMessage(svg: Svg, text: string, options: DiagramOptions)
     return new Dimensions(
         bbox.width + totalPadding + selfArrowWidth,
         bbox.height + totalPadding
+    )
+}
+
+export function sizeTextBox(svg: Svg, text: string, options: TextBoxOptions) {
+    const { padding, margin, textOptions: { align, ...fontOptions } } = options
+    const _text = drawText(svg, text, { align, ...fontOptions })
+    const bbox = _text.bbox()
+    _text.remove()
+
+    const totalPadding = 2 * padding
+    const totalMargin = 2 * margin
+
+    return new Dimensions(
+        bbox.width + totalPadding + totalMargin,
+        bbox.height + totalPadding + totalMargin
     )
 }
