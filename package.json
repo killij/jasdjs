@@ -17,9 +17,9 @@
   "author": "James Killick",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/cairnsj/jasdjs/issues"
+    "url": "https://github.com/killij/jasdjs/issues"
   },
-  "homepage": "https://github.com/cairnsj/jasdjs#readme",
+  "homepage": "https://github.com/killij/jasdjs#readme",
   "devDependencies": {
     "@types/lodash.merge": "^4.6.9",
     "@types/node": "^20.9.1",
