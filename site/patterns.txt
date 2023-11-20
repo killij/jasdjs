@@ -1,0 +1,50 @@
+// background: {
+//     pattern: {
+//         width: 56,
+//         height: 100,
+//         func: (add) => {
+//           add.rect(56, 100).fill('#fff')
+//           add.path('M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100').fill('none').stroke('#f7f7f7').attr({"stroke-width": 2})
+//           add.path('M28 0L28 34L0 50L0 84L28 100L56 84L56 50L28 34').fill('none').stroke('#fafafa').attr({"stroke-width": 2})
+//         }
+//     }
+
+//     // pattern: {
+//     //   width: 25,
+//     //   height: 25,
+//     //   func: (add) => {
+//     //     add.rect(25, 25).fill('#ccc')
+//     //     add.rect(1, 25).fill('#777').move(24,0)
+//     //   }
+//     // }
+// }
+
+
+//background: {
+//color: "#b0d0d3",
+// pattern: {
+//   width: 56,
+//   height: 100,
+//   func: (add) => {
+//     add.rect(56, 100).fill('#fff')
+//     add.path('M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100').fill('none').stroke('#f7f7f7').attr({"stroke-width": 2})
+//     add.path('M28 0L28 34L0 50L0 84L28 100L56 84L56 50L28 34').fill('none').stroke('#fafafa').attr({"stroke-width": 2})
+//   }
+// }
+// pattern: {
+//   width: 25,
+//   height: 25,
+//   func: (add) => {
+//     add.rect(25, 25).fill('#fefefe')
+//     add.rect(1, 25).fill('#eee').move(24,0)
+//   }
+// }
+
+// pattern: {
+//   width: 10,
+//   height: 10,
+//   func: (add) => {
+//     add.rect(10, 10).fill('#fefefe')
+//     add.rect(1, 1).fill('#ccc').move(9,9)
+//   }
+// }

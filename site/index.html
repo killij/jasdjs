@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>jasd.js</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="/site/css/site.css" type="text/css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap" rel="stylesheet" rel="preload">
+    <script async src="/site/js/talents.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js"></script>
+    <!-- <script>
+        WebFont.load({
+            google: {
+                families: ['Roboto']
+            }
+        });
+    </script> -->
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="editor">
+            <div id="editor">
+title: "Release
+Process Into Production"
+
+actor: dev as Developer
+ll: gh as Github
+ll: gha as "Github
+Actions"
+ll: rc as "Release
+Channel"
+
+note over dev: "Create a
+feature & commit"
+dev -&gt; gh: "Merge PR into 'main'"
+gh --&gt;&gt; dev: Success
+gh -&gt;&gt;+gha: "On commit to main"
+note right of gha: "Triggers
+semantic-release"
+gha -&gt; gh: Perform release
+gha -&gt rc : Notify channels
+gh -&gt; gha: "On release"
+note right of gha: "Build docker image"
+gha -&gt; gha: "Complete the
+release process
+to the
+correct env"
+note over gha: "Auto deploy"
+            </div>
+        </div>
+        <div class="diagram">
+            <div id="diagram"></div>
+        </div>
+    </div>
+
+    
+    <script src="../dist/main.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.27.0/ace.js"
+        integrity="sha512-7UWnxa401enUNZ8plgMQJz1EPcNhkPJxI3OsnzlDXsw6Y58hEZMNMSVnkkWAKyuSxtaAE0pss4KJAl5+D403gw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+
+        var editor = ace.edit("editor");
+        editor.setTheme("ace/theme/monokai");
+        editor.getSession().setMode("ace/mode/asciidoc");
+        editor.getSession().on('change', function () {
+            update()
+        });
+
+        function update() {
+            try {
+                const text = editor.getValue()
+                const diagram = jasdjs.Parse(text)
+                const container = document.getElementById("diagram")
+                const renderer = new jasdjs.SequenceDiagramRenderer(diagram, container, {
+                    padding: 20,
+                    title: {
+                        paddingBottom: 0
+                    },
+                    lifelines: {
+                        textBoxOptions: {
+                            margin: 7
+                        }
+                    },
+                    notes: {
+                        textBoxOptions: {
+                            margin: 7
+
+                        }
+                    },
+                    background: window.talentLogo
+                })
+                renderer.render()
+            } catch (ex) {
+                console.error(ex)
+            }
+        }
+
+        update()
+    </script>
+</body>
+</html>

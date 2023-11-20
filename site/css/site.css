@@ -1,0 +1,16 @@
+.container {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  width: 100%;
+}
+
+#editor {
+  width: 400px;
+  height: 100%;
+
+}
+
+.jasd-note {
+    filter: drop-shadow(3px 5px 2px rgb(0 0 0 / 0.2));
+}
