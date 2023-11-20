@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 //
 
-import Parse from './SequenceDiagram'
-import SequenceDiagramRenderer from './SequenceDiagramRenderer'
+import Parse from './SequenceDiagramParser'
+import Renderer from './SequenceDiagramRenderer'
 
-export { Parse, SequenceDiagramRenderer }
+export { Parse, Renderer }

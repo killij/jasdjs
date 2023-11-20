@@ -4,10 +4,10 @@
 //
 
 import { G, Marker, SVG, Svg } from '@svgdotjs/svg.js'
-import { Participant, ParticipantTypes, ElementTypes, SequenceDiagram, NoteLocations, ArrowHeadTypes } from "./SequenceDiagram"
+import { Participant, ParticipantTypes, ElementTypes, SequenceDiagram, NoteLocations, ArrowHeadTypes } from "./SequenceDiagramParser"
 import { Options, DeepPartial, DiagramOptions, BackgroundPattern, Align, defaultColour } from './Options'
 import { Dimensions } from './Dimensions'
-import { drawLifeline, drawMessage, drawSelfMessage, drawText, drawTextBox } from './ElementRenderers'
+import { drawActor, drawLifeline, drawMessage, drawSelfMessage, drawText, drawTextBox } from './ElementRenderers'
 import { sizeMessage, sizeSelfMessage, sizeTextBox } from './ElementSizers'
 
 type Point = [number, number]
@@ -28,7 +28,7 @@ export interface Lifeline {
     participant?: Participant
 }
 
-export default class SequenceDiagramRenderer {
+export default class Renderer {
     private _options: DiagramOptions
     private _diagram: SequenceDiagram
     private _container: HTMLElement
@@ -47,10 +47,14 @@ export default class SequenceDiagramRenderer {
         this._diagram = diagram
         this._options = Options.From(options)
 
-        this._icons.actor = this._svg
+        const actorGroup = this._svg
             .defs()
-            .path("M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z")
-            .transform({scale: 1.5})
+            .group()
+        
+        actorGroup.circle(18).fill("black").cx(15)
+        actorGroup.rect(30, 10).fill("black").y(23)
+        actorGroup.line(5 ,0, 25, 0).stroke({ color: "black", width: 10 }).attr({"stroke-linecap": "round"}).y(23)
+        this._icons.actor = actorGroup
 
         this._markers[ArrowHeadTypes.closed] = this._svg.marker(10, 10, (m: Marker) => {
             m.polygon("0 0, 10 5, 0 10").attr({
@@ -108,8 +112,7 @@ export default class SequenceDiagramRenderer {
             let el: G
             switch (participant.type) {
                 case ParticipantTypes.lifeline: el = drawTextBox(this._svg, participant.alias, this._options.lifelines.textBoxOptions); break
-                case ParticipantTypes.actor: el = drawTextBox(this._svg, participant.alias, this._options.lifelines.textBoxOptions); break
-                //case ParticipantTypes.actor: el = drawActor(this._draw, participant.alias, this._renderer.icons.actor, this._options.lifelines.textBoxOptions); break
+                case ParticipantTypes.actor: el = drawActor(this._svg, participant.alias, this._icons.actor, this._options.lifelines.textBoxOptions); break
             }
     
             const bbox = el.bbox()
@@ -129,7 +132,7 @@ export default class SequenceDiagramRenderer {
         // push a fake right boundary
         lifelines.push({ x: offsetX, index: lifelines.length, spacing: new Map(), dimensions: new Dimensions(0, 0) })
     
-        SequenceDiagramRenderer.spaceLifeLines(lifelines)
+        Renderer.spaceLifeLines(lifelines)
         return { 
             lifelines,
             maxHeight
@@ -149,9 +152,9 @@ export default class SequenceDiagramRenderer {
                         : sizeMessage(this._svg, element.text, this._options)
 
                     if (isSelfMessage) {
-                        SequenceDiagramRenderer.setSpacing(lifelines, getIndex(element.source), participantMap.get(element.target)!.index + 1, d.width)
+                        Renderer.setSpacing(lifelines, getIndex(element.source), participantMap.get(element.target)!.index + 1, d.width)
                     } else {
-                        SequenceDiagramRenderer.setSpacing(lifelines, getIndex(element.source), participantMap.get(element.target)!.index, d.width)
+                        Renderer.setSpacing(lifelines, getIndex(element.source), participantMap.get(element.target)!.index, d.width)
                     }
                     elementY += d.height
                     break
@@ -161,16 +164,16 @@ export default class SequenceDiagramRenderer {
                     const sourceIndex = getIndex(element.target[0])
 
                     switch (element.location) {
-                        case (NoteLocations.leftOf): SequenceDiagramRenderer.setSpacing(lifelines, sourceIndex, sourceIndex - 1, noteDimensions.width); break
-                        case (NoteLocations.rightOf): SequenceDiagramRenderer.setSpacing(lifelines, sourceIndex, sourceIndex + 1, noteDimensions.width); break
+                        case (NoteLocations.leftOf): Renderer.setSpacing(lifelines, sourceIndex, sourceIndex - 1, noteDimensions.width); break
+                        case (NoteLocations.rightOf): Renderer.setSpacing(lifelines, sourceIndex, sourceIndex + 1, noteDimensions.width); break
                         case (NoteLocations.over):
                             let targetIndex = sourceIndex
                             if (element.target.length === 1) {
-                                SequenceDiagramRenderer.setSpacing(lifelines, targetIndex-1, targetIndex, noteDimensions.width / 2)
-                                SequenceDiagramRenderer.setSpacing(lifelines, targetIndex, targetIndex+1, noteDimensions.width / 2)
+                                Renderer.setSpacing(lifelines, targetIndex-1, targetIndex, noteDimensions.width / 2)
+                                Renderer.setSpacing(lifelines, targetIndex, targetIndex+1, noteDimensions.width / 2)
                             } else {
                                 targetIndex = getIndex(element.target[1])
-                                SequenceDiagramRenderer.setSpacing(lifelines, sourceIndex, targetIndex, noteDimensions.width - 2 * overlap)
+                                Renderer.setSpacing(lifelines, sourceIndex, targetIndex, noteDimensions.width - 2 * overlap)
                             }
                             break;
                     }
@@ -184,18 +187,18 @@ export default class SequenceDiagramRenderer {
 
     private renderLifelines(lifelines: Lifeline[], offsetY: number, maxHeight: number): G {
         const group = this._svg.group()
+        group.rect(1, 1).fill("none").stroke("none").move(0,0)
         for (const lifeline of lifelines.slice(1, lifelines.length - 1)) {
             const lifelineGroup = drawLifeline(group, lifeline, offsetY, this._icons.actor, this._options.lifelines)
             lifelineGroup.translate(lifeline.x, maxHeight - lifelineGroup.children()[1].bbox().height)
         }
-        group.rect(1, 1).fill("none").stroke("none").move(0,0).front()
         return group
     }
 
     private renderElements(participantMap: ParticipantMap): G {
         const group = this._svg.group()
         let offsetY = 0
-
+        group.rect(1, 1).fill("none").stroke("none").move(0,0)
         for (const element of this._diagram.elements) {
             switch (element.type) {
                 case ElementTypes.message:
@@ -293,7 +296,7 @@ export default class SequenceDiagramRenderer {
         const elementY = this.layoutElements(lifelines, participantMap)
 
         // calc final lifeline spacing
-        SequenceDiagramRenderer.spaceLifeLines(lifelines)
+        Renderer.spaceLifeLines(lifelines)
 
         // lifelines draw
         const lifelinesGroup = this.renderLifelines(lifelines, elementY, maxHeight)

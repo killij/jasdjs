@@ -4,7 +4,7 @@
 //
 
 import merge from "lodash.merge"
-import { ArrowHeadTypes, ArrowLineTypes } from "./SequenceDiagram"
+import { ArrowHeadTypes, ArrowLineTypes } from "./SequenceDiagramParser"
 import { G, Marker, Svg } from "@svgdotjs/svg.js"
 import { Pattern } from "@svgdotjs/svg.js"
 

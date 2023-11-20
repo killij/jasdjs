@@ -6,7 +6,7 @@
 import { G, Marker, Polyline, Svg, Text } from "@svgdotjs/svg.js"
 import { Align, ArrowOptions, LifelineOptions, LineOptions, MessageOptions, TextBoxOptions, TextOptions, defaultColour, defaultContrastColour } from "./Options"
 import { Lifeline, Points } from "./SequenceDiagramRenderer"
-import { ArrowLineTypes, Message, ParticipantTypes } from "./SequenceDiagram"
+import { ArrowLineTypes, Message, ParticipantTypes } from "./SequenceDiagramParser"
 
 export function drawText(svg: Svg | G, text: string, textOptions: TextOptions): Text {
     const t = svg.text(text)
@@ -97,16 +97,16 @@ export function drawActor(svg: Svg | G, text: string, icon: Marker, options: Tex
     const iconSpacing = 5
 
     const group = svg.group()
-    const t = drawText(group, text, textOptions)
-    const textBbox = t.bbox()
+    const _text = drawText(group, text, textOptions)
+    const textBbox = _text.bbox()
     const iconBbox = icon!.bbox()
     
     const width = Math.max(iconBbox.width, textBbox.width) + doublePadding + doubleMargin
     const height = iconBbox.height + textBbox.height + doublePadding + doubleMargin + iconSpacing
 
-    const invisibleRect = group.rect(width + doubleMargin, height + doubleMargin).move(0,0).stroke("none").fill("none")
-    group.use(icon!).x((width - iconBbox.width)/2).y(margin + padding)
-    t.cx(width / 2).y(height - margin - padding - textBbox.height)
+    const invisibleRect = group.rect(width, height).move(0,0).stroke("none").fill("none")
+    group.use(icon!).x((width - iconBbox.width)/2).y(padding + margin + textBbox.height + 5)
+    _text.cx(width / 2).y(padding + margin)
     invisibleRect.back()
 
     return group
@@ -118,8 +118,7 @@ export function drawLifeline(svg: Svg | G, lifeline: Lifeline, height: number, i
     let top: G
     switch (lifeline.participant!.type) {
         case ParticipantTypes.lifeline: top = drawTextBox(group, participant.alias, options.textBoxOptions); break
-        case ParticipantTypes.actor: top = drawTextBox(group, participant.alias, options.textBoxOptions); break
-        //case ParticipantTypes.actor: top = drawActor(group, participant.alias, icon, options.textBoxOptions); break
+        case ParticipantTypes.actor: top = drawActor(group, participant.alias, icon, options.textBoxOptions); break
     }
 
     const bbox = top.bbox()
@@ -130,7 +129,6 @@ export function drawLifeline(svg: Svg | G, lifeline: Lifeline, height: number, i
     const line = drawLine(group, [[bbox.cx, bbox.cy], [bbox.cx, bbox.cy + height + bbox.height]], options.lineOptions)
     line.back()
 
-    //group.rect(group.bbox().width, group.bbox().height).fill("none").stroke("green").move(0,0).front()
     return group
 }
 
