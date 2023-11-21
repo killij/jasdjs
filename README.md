@@ -19,7 +19,7 @@ multiline text too"
 note over A, C: Oh and notes can span over two lifelines too
 ```
 
-![Example Sequence Diagram](/images/example-1.png)
+<img src="images/example-1.png" width="350">
 
 jasdjs is intended to allow you to create visually appealing documentation for your organisation.
 
