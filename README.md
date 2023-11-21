@@ -33,3 +33,6 @@ jasdjs is designed to run in a browser.
 
 ## Getting started
 This project is in its infancy atm, so please be patient.
+
+## License
+[MIT](LICENSE)
