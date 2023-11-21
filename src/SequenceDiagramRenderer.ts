@@ -259,17 +259,19 @@ export default class Renderer {
 
     private renderTitle(offsetX: number, offsetY: number, totalWidth: number): G {
         const group = this._svg.group()
-        drawText(group, this._diagram.title ?? "", this._options.title.textOptions)
+        group.attr("translate-origin", "1000 1000")
+        const _text = drawText(group, this._diagram.title ?? "", this._options.title.textOptions)
         
         switch (this._options.title.textOptions.align) {
             case Align.left:
-                group.translate(offsetX, offsetY)
+                group.move(offsetX, offsetY)
                 break
             case Align.middle:
-                group.translate(totalWidth / 2, offsetY)
+                group.cx(totalWidth / 2)
+                group.y(offsetY)
                 break
             case Align.right:
-                group.translate(totalWidth - this._options.padding, offsetY)
+                group.move(totalWidth - this._options.padding - _text.bbox().width, offsetY)
                 break
         }
 
@@ -324,6 +326,5 @@ export default class Renderer {
 
         // draw background
         this.renderBackground(diagramWidth, diagramHeight)
-        //this._renderer.draw.group().op
     }  
 }
