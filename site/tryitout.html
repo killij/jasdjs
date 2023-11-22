@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html class="h-100">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>JASDjs - Try it out</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.27.0/ace.js"
+            integrity="sha512-7UWnxa401enUNZ8plgMQJz1EPcNhkPJxI3OsnzlDXsw6Y58hEZMNMSVnkkWAKyuSxtaAE0pss4KJAl5+D403gw=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js"></script>
+        <script src="../dist/main.js"></script>
+        <script src="/site/js/tryitout.js"></script>
+    </head>
+    <body class="h-100">
+        <div class="container-fluid">
+            <header class="d-flex flex-wrap justify-content-center py-3 mb-0 border-bottom">
+              <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
+                <img height="40" src="/site/img/logo.svg">
+                <!-- <svg class="bi me-2" width="40" height="32"><use xlink:href="#bootstrap"></use></svg> -->
+                <!-- <div class="fs-4">JASDjs</div> -->
+                <div>
+
+                    <small class="text-muted">&nbsp;&nbsp;&nbsp;(Just Another Sequence Diagrammer)</small>
+                </div>
+              </a>
+        
+              <ul class="nav nav-pills">
+                <li class="nav-item"><a href="#" class="nav-link">Home</a></li>
+                <li class="nav-item"><a href="#" class="nav-link active" aria-current="page">Try it out</a></li>
+                <li class="nav-item"><a href="#" class="nav-link">FAQ</a></li>
+                <li class="nav-item"><a href="#" class="nav-link">Github</a></li>
+              </ul>
+            </header>
+          </div>
+          <div class="container-fluid h-100">
+            <div class="row mb-3 text-center h-100">
+                <div class="col-md-4 ps-0 pe-1 themed-grid-col" style="background-color: #ccc">
+                    <div class="editor h-100">
+                        <div id="editor" class="h-100">
+title: "Release Process
+Into Production"
+
+actor: dev as Developer
+ll: gh as Github
+ll: gha as "Github
+Actions"
+ll: sr as "semantic-release"
+ll: rc as "Release
+Channel"
+dev -&gt; gh: "Merge PR into 'main'"
+gh --&gt;&gt; dev: Success
+gh -&gt;&gt;+gha: "on: push: branches:
+main"
+gha -&gt; sr: run
+sr -&gt; gh: fetch commits
+gh --&gt;&gt; sr: commit history
+sr -&gt; gh: Create release
+sr -&gt; rc : Notify
+sr --&gt;&gt; gha: 
+gh -&gt; gha: "on: release: types:
+[published]"
+note over gha: "Build docker image"
+note over gha: "Auto deploy"
+gha --&gt;&gt; gh:</div>
+                    </div>
+                </div>
+                <div class="col-md-8 themed-grid-col">
+                    <div class="diagram">
+                        <div id="diagram"></div>
+                    </div>
+                </div>
+              </div>
+          </div>
+
+    </body>
+</html>
