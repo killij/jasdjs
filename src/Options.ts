@@ -36,6 +36,7 @@ export type TextOptions = FontOptions & {
 }
 
 export type TextBoxOptions = {
+    name?: string
     fill?: string
     rounding?: number
     margin: number
@@ -83,6 +84,7 @@ export type MessageOptions = {
 }
 
 export type NoteOptions = {
+    name?: string
     textBoxOptions: TextBoxOptions
     overlap: number
 }
@@ -134,7 +136,7 @@ export class Options {
         fill: '#fff',
         margin: 5,
         padding: 6,
-        rounding: 5,
+        rounding: 2,
 
         textOptions: {
             align: Align.middle,

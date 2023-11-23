@@ -53,7 +53,7 @@ function talentBackground(draw, width, height) {
 
     logoGroup.cx(width / 2)
     logoGroup.cy(height / 2)
-    logoGroup.scale(calculatedScaleFactor, calculatedScaleFactor).opacity(0.05)
+    logoGroup.scale(calculatedScaleFactor, calculatedScaleFactor).opacity(0.15)
     return group
 }
 
@@ -66,51 +66,58 @@ function update() {
         // rendererx.render()
         // return
         const renderer = new jasdjs.Renderer(diagram, container, {
-            padding: 20,
-            title: {
-                paddingBottom: 20,
-                textOptions: {
-                    align: "right",
-                    family: "Work Sans",
-                    size: 36,
-                    fill: "#009CB8",
-                    weight: "bold"
-                }
-            },
-            lifelines: {
-                textBoxOptions: {
-                    margin: 7
-                }
-            },
-            notes: {
-                textBoxOptions: {
-                    margin: 7
+            // padding: 20,
+            // title: {
+            //     paddingBottom: 20,
+            //     textOptions: {
+            //         align: "right",
+            //         family: "Work Sans",
+            //         size: 36,
+            //         fill: "#009CB8",
+            //         weight: "bold"
+            //     }
+            // },
+            // notes: {
+            //     name: "jasd-note",
+            //     textBoxOptions: {
+            //         margin: 7
 
-                }
-            },
-            lifelines: {
-                textBoxOptions: {
-                    rounding: 7,
-                    padding: 15,
-                    fill: "#fafafa",
-                    textOptions: {
-                        family: "Work Sans",
-                        size: 16,
-                    },
-                    strokeOptions: {
-                        width: 1,
-                        fill: "#777"
-                    }
-                },
-                lineOptions: {
-                    //width: 1,
-                    fill: "#777",
-                    lineType: "dashed",
-                    dashStyle: "16 2"
-                }
-            },
-            
-            background: talentBackground
+            //     }
+            // },
+            // lifelines: {
+            //     textBoxOptions: {
+            //         rounding: 7,
+            //         padding: 15,
+            //         margin: 7,
+            //         fill: "#fafafa",
+            //         textOptions: {
+            //             family: "Work Sans",
+            //             size: 16,
+            //         },
+            //         strokeOptions: {
+            //             width: 1,
+            //             fill: "#777"
+            //         }
+            //     },
+            //     lineOptions: {
+            //         //width: 1,
+            //         fill: "#777",
+            //         lineType: "dashed",
+            //         dashStyle: "16 2"
+            //     }
+            // },
+            // background: talentBackground
+
+            // background: {
+            //     pattern: {
+            //         width: 10,
+            //         height: 10,
+            //         func: (add) => {
+            //             add.rect(10, 10).fill('#fefefe')
+            //             add.rect(1, 1).fill('#ccc').move(9,9)
+            //         }
+            //     }
+            // }
         })
         renderer.render()
     } catch (ex) {

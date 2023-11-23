@@ -1,106 +1,42 @@
 <!DOCTYPE html>
-<html>
+<html class="h-100">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>JASDjs</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    </head>
+    <body>
+        <div class="container-fluid">
+            <header class="d-flex flex-wrap justify-content-center py-3 mb-0 border-bottom">
+              <a href="/site" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
+                <img height="50" src="/site/img/logo.svg">
+                <div>
+                    <small class="text-muted">&nbsp;&nbsp;&nbsp;(Just Another Sequence Diagrammer)</small>
+                </div>
+              </a>
+        
+              <ul class="nav nav-pills">
+                  <li class="nav-item"><a href="/site/index" class="nav-link active" aria-current="page">Home</a></li>
+                <li class="nav-item"><a href="/site/tryitnow" class="nav-link">Try it now</a></li>
+                <li class="nav-item"><a href="https://github.com/killij/jasdjs" class="nav-link">Github</a></li>
+              </ul>
+            </header>
+        </div>
 
-<head>
-    <meta charset="utf-8" />
-    <title>jasd.js</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="/site/css/site.css" type="text/css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap" rel="stylesheet" rel="preload">
-    <script async src="/site/js/talents.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js"></script>
-    <!-- <script>
-        WebFont.load({
-            google: {
-                families: ['Roboto']
-            }
-        });
-    </script> -->
-</head>
-
-<body>
-
-    <div class="container">
-        <div class="editor">
-            <div id="editor">
-title: "Release
-Process Into Production"
-
-actor: dev as Developer
-ll: gh as Github
-ll: gha as "Github
-Actions"
-ll: rc as "Release
-Channel"
-
-note over dev: "Create a
-feature & commit"
-dev -&gt; gh: "Merge PR into 'main'"
-gh --&gt;&gt; dev: Success
-gh -&gt;&gt;+gha: "On commit to main"
-note right of gha: "Triggers
-semantic-release"
-gha -&gt; gh: Perform release
-gha -&gt rc : Notify channels
-gh -&gt; gha: "On release"
-note right of gha: "Build docker image"
-gha -&gt; gha: "Complete the
-release process
-to the
-correct env"
-note over gha: "Auto deploy"
+        <div class="px-4 pt-5 my-5 text-center border-bottom">
+            <h1 class="display-4 fw-bold text-body-emphasis">Sequence Diagrams for the masses</h1>
+            <div class="col-lg-6 mx-auto">
+              <p class="lead mb-4">Quickly sketch out process flows then spend hours making them look pretty.</p>
+              <div class="d-grid gap-2 d-sm-flex justify-content-sm-center mb-5">
+                <a role="button" href="/site/tryitnow" class="btn btn-primary btn-lg px-4 me-sm-3">Try it now</a>
+              </div>
             </div>
-        </div>
-        <div class="diagram">
-            <div id="diagram"></div>
-        </div>
-    </div>
-
-    
-    <script src="../dist/main.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.27.0/ace.js"
-        integrity="sha512-7UWnxa401enUNZ8plgMQJz1EPcNhkPJxI3OsnzlDXsw6Y58hEZMNMSVnkkWAKyuSxtaAE0pss4KJAl5+D403gw=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script>
-
-        var editor = ace.edit("editor");
-        editor.setTheme("ace/theme/monokai");
-        editor.getSession().setMode("ace/mode/asciidoc");
-        editor.getSession().on('change', function () {
-            update()
-        });
-
-        function update() {
-            try {
-                const text = editor.getValue()
-                const diagram = jasdjs.Parse(text)
-                const container = document.getElementById("diagram")
-                const renderer = new jasdjs.SequenceDiagramRenderer(diagram, container, {
-                    padding: 20,
-                    title: {
-                        paddingBottom: 0
-                    },
-                    lifelines: {
-                        textBoxOptions: {
-                            margin: 7
-                        }
-                    },
-                    notes: {
-                        textBoxOptions: {
-                            margin: 7
-
-                        }
-                    },
-                    background: window.talentLogo
-                })
-                renderer.render()
-            } catch (ex) {
-                console.error(ex)
-            }
-        }
-
-        update()
-    </script>
-</body>
+            <!-- <div class="overflow-hidden" style="max-height: 30vh;">
+              <div class="container px-5">
+                <img src="banner-image.png" class="img-fluid border rounded-3 shadow-lg mb-4" alt="Example image" width="700" height="500" loading="lazy">
+              </div>
+            </div> -->
+          </div>
+    </body>
 </html>

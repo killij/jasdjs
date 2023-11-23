@@ -219,8 +219,9 @@ export default class Renderer {
                         case NoteLocations.leftOf:
                             this._options.notes.textBoxOptions.textOptions.align = Align.right
                             const leftOfNote = drawTextBox(group, element.text, this._options.notes.textBoxOptions).move(0,0)
-                            leftOfNote.addClass("jasd-note")
-                            
+                            if (this._options.notes.name) {
+                                leftOfNote.addClass(this._options.notes.name)
+                            }
                             leftOfNote.translate(noteSource.x + noteSource.dimensions.cx - leftOfNote.bbox().width, offsetY)
                             offsetY += leftOfNote.bbox().height ?? 0
                             break
@@ -232,7 +233,9 @@ export default class Renderer {
                                 : participantMap.get(element.target[1])!
                             const minimumWidth = Math.abs(source.x + source.dimensions.cx - (target.x + target.dimensions.cx)) + 2 * this._options.notes.textBoxOptions.margin
                             const overNote = drawTextBox(group, element.text, this._options.notes.textBoxOptions, minimumWidth).move(0,0)
-                            overNote.addClass("jasd-note")
+                            if (this._options.notes.name) {
+                                overNote.addClass(this._options.notes.name)
+                            }
 
                             if (element.target.length === 1) {
                                 overNote.y(offsetY)
@@ -246,7 +249,9 @@ export default class Renderer {
                         case NoteLocations.rightOf:
                             this._options.notes.textBoxOptions.textOptions.align = Align.left
                             const rightOfNote = drawTextBox(group, element.text, this._options.notes.textBoxOptions).move(0,0)
-                            rightOfNote.addClass("jasd-note")
+                            if (this._options.notes.name) {
+                                rightOfNote.addClass(this._options.notes.name)
+                            }
                             rightOfNote.translate(noteSource.x + noteSource.dimensions.cx, offsetY)
                             offsetY += rightOfNote.bbox().height ?? 0
                             break
