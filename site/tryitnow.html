@@ -34,33 +34,10 @@
             <div class="row mb-3 text-center h-100">
                 <div class="col-md-4 ps-0 pe-1 themed-grid-col" style="background-color: #ccc">
                     <div class="editor h-100">
-                        <div id="editor" class="h-100">title: "Release Process"
-
-actor: dev as Developer
-ll: gh as Github
-ll: gha as "Github
-Actions"
-ll: sr as "semantic-release"
-ll: rc as "Release
-Channel"
-
-dev -> gh: "Merge PR"
-gh --> dev: Success
-gh ->+gha: "on: push: branches: [...]"
-gha -> sr: Run
-sr -> gh: Fetch commits
-gh --> sr: Commit history
-sr -> gh: Create release
-sr ->> rc : Notify
-sr --> gha: 
-gh -> gha: "on: release: types: [published]"
-note over gha: "'Docker publish'
-Docker image is built & added to the private
-docker repository"
-gha --> gh:
-dev -> gha: Deploy tagged image
-gha -> env: Deploy image
-gha --> dev: Done</div>
+                        <div id="editor" class="h-100">title: simple example
+a -> b: "request(id)"
+b --> a: "response(result)"
+</div>
                     </div>
                 </div>
                 <div class="col-md-8 themed-grid-col">
