@@ -1,10 +1,3 @@
-// @ts-nocheck 
-
-//
-// Copyright (c) James Killick and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for details.
-//
-
 "use strict";
 
 function peg$subclass(child, parent) {

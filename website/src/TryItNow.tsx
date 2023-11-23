@@ -2,10 +2,17 @@ import AceEditor from "react-ace"
 //import "ace-builds/src-noconflict/mode-text"
 import "ace-builds/src-noconflict/theme-xcode"
 //import "ace-builds/src-noconflict/ext-language_tools"
+import { Parse, Renderer } from "jasdjs"
 
-
-function onChange(newValue: any) {
-    console.log("change", newValue);
+function onChange(newValue: string) {
+    try {
+        const sd = Parse(newValue)
+        const el = document.getElementById("diagram")!
+        const renderer = new Renderer(sd, el, {})
+        renderer.render()
+    } catch (err) {
+        console.log(err)
+    }
 }
 
 export default function TryItNow() {

@@ -6,7 +6,7 @@
     "target": "es2016",                                  /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
   
     /* Modules */
-    "module": "ES2015",                                /* Specify what module code is generated. */
+    "module": "ESNext",                                /* Specify what module code is generated. */
     "rootDir": "./src",                                  /* Specify the root folder within your source files. */
     "moduleResolution": "Node",
     
@@ -15,7 +15,7 @@
 
     /* Emit */
     "declaration": true,                              /* Generate .d.ts files from TypeScript and JavaScript files in your project. */
-    "outDir": "./build",                                  /* Specify an output folder for all emitted files. */
+    "outDir": "./dist",                                  /* Specify an output folder for all emitted files. */
 
     /* Interop Constraints */
     "esModuleInterop": true,                             /* Disable resolving symlinks to their realpath. This correlates to the same flag in node. */
