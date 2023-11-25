@@ -1,26 +1,34 @@
-import Dropdown from 'react-bootstrap/Dropdown'
-import DropdownButton from 'react-bootstrap/DropdownButton'
-import ButtonGroup from 'react-bootstrap/ButtonGroup'
+import Nav from 'react-bootstrap/Nav'
+import Navbar from 'react-bootstrap/Navbar'
+import NavDropdown from 'react-bootstrap/NavDropdown'
 
 export default function Toolbar({ onThemeSelect }: any) {
     return (
-        <div className="navbar fixed-bottom navbar-expand-sm navbar-dark bg-dark">
-            <div className="container-fluid">
-                <div className="collapse navbar-collapse" id="navbarCollapse">
-                    <ul className="navbar-nav">
-                        <li className="nav-item dropup">
-                        <DropdownButton as={ButtonGroup} key="up" drop="up" variant="secondary" title="Theme" onSelect={onThemeSelect}>
-                                <Dropdown.Item eventKey="default">Default</Dropdown.Item>
-                                <Dropdown.Item eventKey="basic">Basic</Dropdown.Item>
-                                <Dropdown.Item eventKey="lol">I need a designer</Dropdown.Item>
-                                <Dropdown.Divider />
-                                <Dropdown.Header>Sponsors</Dropdown.Header>
-                                <Dropdown.Item eventKey="talent">Talent Consulting</Dropdown.Item>
-                            </DropdownButton>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+        <Navbar expand="lg" className="navbar-dark bg-dark" as="div" role="" fixed="bottom">
+            <Navbar.Brand as="div">&nbsp;Styles</Navbar.Brand>
+            {/* <Navbar.Collapse id="basic-navbar-nav"> */}
+                    <Nav className="me-auto">
+                        <NavDropdown title="Themes" drop="up" key="up" onSelect={onThemeSelect}>
+                            <NavDropdown.Item eventKey="default">Default</NavDropdown.Item>
+                            <NavDropdown.Item eventKey="basic">Basic</NavDropdown.Item>
+                            <NavDropdown.Item eventKey="lol">I'm not artistic</NavDropdown.Item>
+                            <NavDropdown.Divider />
+                            <NavDropdown.Header>Sponsors</NavDropdown.Header>
+                            <NavDropdown.Item eventKey="talent">Talent</NavDropdown.Item>
+                        </NavDropdown>
+                        <NavDropdown title="Background" drop="up" key="up">
+                            <NavDropdown.Header>Coming soon...</NavDropdown.Header>
+                            {/* <NavDropdown.Header>Colours</NavDropdown.Header>
+                            <NavDropdown.Item eventKey="white">White</NavDropdown.Item>
+                            <NavDropdown.Item eventKey="light-grey">Light Grey</NavDropdown.Item>
+                            <NavDropdown.Item eventKey="medium-greay">Medium Grey</NavDropdown.Item>
+                            <NavDropdown.Divider />
+                            <NavDropdown.Header>Patterns</NavDropdown.Header>
+                            <NavDropdown.Item eventKey="dots">Dots</NavDropdown.Item>
+                            <NavDropdown.Item eventKey="dots">Cubic</NavDropdown.Item> */}
+                        </NavDropdown>
+                    </Nav>
+                {/* </Navbar.Collapse> */}
+        </Navbar>
     )
 }

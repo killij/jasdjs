@@ -4,7 +4,8 @@ import "ace-builds/src-noconflict/theme-xcode"
 import { Parse, Renderer } from "jasdjs"
 import Toolbar from "./Toolbar"
 import Header from "./Header"
-import Talent from "./themes/talents"
+import TalentTheme from "./themes/talents"
+import BasicTheme from "./themes/basic"
 import './TryItNow.css'
 
 export default function TryItNow() {
@@ -16,7 +17,8 @@ export default function TryItNow() {
 
     const handleThemeSelect = useCallback((key: string) => {
         switch (key) {
-            case "talent": setTheme(Talent); break
+            case "basic": setTheme(BasicTheme); break
+            case "talent": setTheme(TalentTheme); break
             default: setTheme({})
         }
     }, [setTheme])
@@ -43,7 +45,7 @@ export default function TryItNow() {
         <Toolbar onThemeSelect={handleThemeSelect} />
         <div className="container-fluid h-100">
             <div className="row mb-3 text-center h-100">
-                <div className="col-md-4 ps-0 pe-1 themed-grid-col" style={{ backgroundColor: "#ccc" }}>
+                <div className="col-md-4 ps-0 pe-1 themed-grid-col" style={{ backgroundColor: "#ccc", maxWidth: "400px" }}>
                     <div className="h-100">
                         <AceEditor name="editor"
                             mode="text" theme="xcode"

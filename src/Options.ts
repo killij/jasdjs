@@ -136,7 +136,7 @@ export class Options {
         fill: '#fff',
         margin: 5,
         padding: 6,
-        rounding: 2,
+        rounding: 7,
 
         textOptions: {
             align: Align.middle,
