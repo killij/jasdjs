@@ -16,10 +16,19 @@ function getTheme(id: string) {
     }
 }
 
+const defaultDocument = `title: A title
+
+ll: j as John
+ll: s as Simon
+
+j -> s: Hello
+s --> j: "Hi, how are you?"
+`
+
 export default function TryItNow() {
     const [text, setText] = useState(() => {
         const value = window.localStorage.getItem("jasd-document")
-        return value !== null ? value : ""
+        return value !== null ? value : defaultDocument
     })
     const [themeId, setThemeId] = useState(() => {
         const value = window.localStorage.getItem("jasd-theme")
