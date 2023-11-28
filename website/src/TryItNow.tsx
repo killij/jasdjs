@@ -23,6 +23,8 @@ ll: s as Simon
 
 j -> s: Hello
 s --> j: "Hi, how are you?"
+note over j: "What a nice chap,
+thought John"
 `
 
 export default function TryItNow() {
