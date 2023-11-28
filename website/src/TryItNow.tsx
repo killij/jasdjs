@@ -8,25 +8,38 @@ import TalentTheme from "./themes/talents"
 import BasicTheme from "./themes/basic"
 import './TryItNow.css'
 
+function getTheme(id: string) {
+    switch (id) {
+        case "basic": return BasicTheme
+        case "talent": return TalentTheme
+        default: return {}
+    }
+}
+
 export default function TryItNow() {
     const [text, setText] = useState(() => {
         const value = window.localStorage.getItem("jasd-document")
         return value !== null ? value : ""
     })
-    const [theme, setTheme] = useState({})
+    const [themeId, setThemeId] = useState(() => {
+        const value = window.localStorage.getItem("jasd-theme")
+        return value !== null ? value : "default"
+    })
+    const [theme, setTheme] = useState(getTheme(themeId))
 
     const handleThemeSelect = useCallback((key: string) => {
-        switch (key) {
-            case "basic": setTheme(BasicTheme); break
-            case "talent": setTheme(TalentTheme); break
-            default: setTheme({})
-        }
-    }, [setTheme])
+        setThemeId(key)
+        window.localStorage.setItem("jasd-theme", key)
+    }, [setThemeId])
 
     const handleDocumentChange = useCallback((text: string) => {
         setText(text)
         window.localStorage.setItem("jasd-document", text)
     }, [setText])
+
+    useEffect(() => {
+        setTheme(getTheme(themeId))
+    }, [themeId, setTheme])
 
     useEffect(() => {
         try {
@@ -42,7 +55,7 @@ export default function TryItNow() {
     return (
     <>
         <Header />
-        <Toolbar onThemeSelect={handleThemeSelect} />
+        <Toolbar selectedTheme={themeId} onThemeSelect={handleThemeSelect} />
         <div className="container-fluid h-100">
             <div className="row mb-3 text-center h-100">
                 <div className="col-md-4 ps-0 pe-1 themed-grid-col" style={{ backgroundColor: "#ccc", maxWidth: "400px" }}>

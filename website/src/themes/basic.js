@@ -1,13 +1,11 @@
 export default {
     padding: 20,
     title: {
-        paddingBottom: 20,
+        paddingBottom: 10,
         textOptions: {
-            align: "right",
+            align: "middle",
             family: "Arial",
             size: 36,
-            fill: "#009CB8",
-            weight: "bold"
         }
     },
     messages: {
@@ -33,6 +31,9 @@ export default {
                 family: "Arial",
                 size: 16,
             }
+        },
+        lineOptions: {
+            fill: "#aaa"
         }
     }
 }

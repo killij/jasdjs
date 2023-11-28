@@ -69,7 +69,7 @@ export default {
     lifelines: {
         textBoxOptions: {
             rounding: 7,
-            padding: 15,
+            padding: 10,
             margin: 7,
             fill: "#fafafa",
             textOptions: {
