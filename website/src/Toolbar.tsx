@@ -16,6 +16,14 @@ export default function Toolbar({ selectedTheme, onThemeSelect }: any) {
             selected: selectedTheme === "basic"
         },
     ]
+
+    const sponsorThemes = [
+        {
+            key: "talent",
+            title: "Talent Consulting",
+            selected: selectedTheme === "talent"
+        },
+    ]
     
     return (
         <div className="container-fluid toolbar bg-dark">
@@ -25,10 +33,13 @@ export default function Toolbar({ selectedTheme, onThemeSelect }: any) {
                         return <Dropdown.Item eventKey={theme.key} active={theme.selected} className="checked">{theme.title}</Dropdown.Item>
                     })
                 }
-                {/*
                 <Dropdown.Divider />
                 <Dropdown.Header>Sponsors</Dropdown.Header>
-                <Dropdown.Item eventKey="talent">Talent Consulting</Dropdown.Item> */}
+                {
+                    sponsorThemes.map(theme => {
+                        return <Dropdown.Item eventKey={theme.key} active={theme.selected} className="checked">{theme.title}</Dropdown.Item>
+                    })
+                }
             </DropdownButton>
         </div>
     )

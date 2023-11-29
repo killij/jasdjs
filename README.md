@@ -103,5 +103,9 @@ note over Jack, John: "This is a
 multiline note"
 ```
 
+## Sponsors
+
+- [Talent Consulting](https://www.talentconsulting.uk/)
+
 ## License
 [MIT](LICENSE)
