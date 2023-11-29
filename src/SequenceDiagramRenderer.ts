@@ -264,7 +264,6 @@ export default class Renderer {
 
     private renderTitle(offsetX: number, offsetY: number, totalWidth: number): G {
         const group = this._svg.group()
-        group.attr("translate-origin", "1000 1000")
         const _text = drawText(group, this._diagram.title ?? "", this._options.title.textOptions)
         
         switch (this._options.title.textOptions.align) {
