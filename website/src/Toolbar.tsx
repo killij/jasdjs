@@ -27,17 +27,17 @@ export default function Toolbar({ selectedTheme, onThemeSelect }: any) {
     
     return (
         <div className="container-fluid toolbar bg-dark">
-            <DropdownButton  key="down" drop="down" variant="secondary" title="Theme" onSelect={onThemeSelect}>
+            <DropdownButton  key="theme" drop="down" variant="secondary" title="Theme" onSelect={onThemeSelect}>
                 {
                     defaultThemes.map(theme => {
-                        return <Dropdown.Item eventKey={theme.key} active={theme.selected} className="checked">{theme.title}</Dropdown.Item>
+                        return <Dropdown.Item key={theme.key} eventKey={theme.key} active={theme.selected} className="checked">{theme.title}</Dropdown.Item>
                     })
                 }
                 <Dropdown.Divider />
                 <Dropdown.Header>Sponsors</Dropdown.Header>
                 {
                     sponsorThemes.map(theme => {
-                        return <Dropdown.Item eventKey={theme.key} active={theme.selected} className="checked">{theme.title}</Dropdown.Item>
+                        return <Dropdown.Item key={theme.key} eventKey={theme.key} active={theme.selected} className="checked">{theme.title}</Dropdown.Item>
                     })
                 }
             </DropdownButton>
