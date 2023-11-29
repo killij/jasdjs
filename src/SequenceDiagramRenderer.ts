@@ -146,15 +146,16 @@ export default class Renderer {
         for (const element of this._diagram.elements) {
             switch (element.type) {
                 case ElementTypes.message:
+                    console.log(element.modifier)
                     const isSelfMessage = element.source === element.target
                     const d = isSelfMessage
                         ? sizeSelfMessage(this._svg, element.text, this._options)
                         : sizeMessage(this._svg, element.text, this._options)
 
                     if (isSelfMessage) {
-                        Renderer.setSpacing(lifelines, getIndex(element.source), participantMap.get(element.target)!.index + 1, d.width)
+                        Renderer.setSpacing(lifelines, getIndex(element.source), getIndex(element.target) + 1, d.width)
                     } else {
-                        Renderer.setSpacing(lifelines, getIndex(element.source), participantMap.get(element.target)!.index, d.width)
+                        Renderer.setSpacing(lifelines, getIndex(element.source), getIndex(element.target), d.width)
                     }
                     elementY += d.height
                     break
