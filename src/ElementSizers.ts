@@ -27,17 +27,20 @@ export function sizeMessage(svg: Svg, markers: any, message: Message, options: D
     return new Dimensions(width, height)
 }
 
-export function sizeSelfMessage(svg: Svg, text: string, options: DiagramOptions) {
+export function sizeSelfMessage(svg: Svg, message: Message, options: DiagramOptions) {
     const { messages: { fontOptions, selfArrowWidth, padding } } = options
-    const _text = drawText(svg, text, { align: Align.left, ...fontOptions })
-    const bbox = _text.bbox()
-    _text.remove();
-    const totalPadding = 2 * padding
+    let height = 2 * padding
+    let width = height + selfArrowWidth
 
-    return new Dimensions(
-        bbox.width + totalPadding + selfArrowWidth,
-        bbox.height + totalPadding
-    )
+    if (message.text && (message.text.trim() !== "")) {
+        const text = drawText(svg, message.text, { align: Align.left, ...fontOptions }) 
+        const bbox = text.bbox()
+        height += bbox.height
+        width += bbox.width
+        text.remove()
+    } else height += 10
+
+    return new Dimensions(width, height)
 }
 
 export function sizeTextBox(svg: Svg, text: string, options: TextBoxOptions) {

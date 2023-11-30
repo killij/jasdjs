@@ -173,7 +173,7 @@ export default class Renderer {
 
                     const activationsPadding = left.activations * 10
                     if (isSelfMessage) {
-                        const d = sizeSelfMessage(this._svg, element.text, this._options)
+                        const d = sizeSelfMessage(this._svg, element, this._options)
                         Renderer.setSpacing(lifelines, getIndex(element.source), getIndex(element.target) + 1, d.width + activationsPadding)
                         elementY += d.height
                     } else {
@@ -243,7 +243,7 @@ export default class Renderer {
                         const width = Math.abs(source.cx - target.cx)
                         result = drawMessage(group, this._markers, element, left.cx, offsetY, width, source.index < target.index, this._options.messages)
                     } else {
-                        result = drawSelfMessage(group, this._markers, element, source, this._options.messages)
+                        result = drawSelfMessage(group, this._markers, element, left.cx, offsetY, this._options.messages)
                     }
 
                     offsetY += result.group.bbox().height
