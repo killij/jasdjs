@@ -7,7 +7,7 @@ import { G, Marker, SVG, Svg } from '@svgdotjs/svg.js'
 import { Participant, ParticipantTypes, ElementTypes, SequenceDiagram, NoteLocations, ArrowHeadTypes } from "./SequenceDiagramParser"
 import { Options, DeepPartial, DiagramOptions, BackgroundPattern, Align, defaultColour } from './Options'
 import { Dimensions } from './Dimensions'
-import { drawActor, drawLifeline, drawMessage, drawSelfMessage, drawText, drawTextBox } from './ElementRenderers'
+import { DrawMessageResult, drawActor, drawLifeline, drawMessage, drawSelfMessage, drawText, drawTextBox } from './ElementRenderers'
 import { sizeMessage, sizeSelfMessage, sizeTextBox } from './ElementSizers'
 
 type Point = [number, number]
@@ -20,12 +20,20 @@ interface LifeLines {
 
 type ParticipantMap = Map<Participant, Lifeline>
 
-export interface Lifeline {
-    x: number
-    dimensions: Dimensions
-    spacing: Map<number, number>
-    index: number
-    participant?: Participant
+export class Lifeline {
+    public x: number = 0
+    public dimensions: Dimensions = Dimensions.None
+    public spacing: Map<number, number> = new Map()
+    public index: number = 0
+    public participant?: Participant
+    public activations: number = 0
+    public get cx() {
+        return this.x + this.dimensions.cx
+    }
+
+    constructor(init?: Partial<Lifeline>) {
+        Object.assign(this, init)
+    }
 }
 
 export default class Renderer {
@@ -106,7 +114,7 @@ export default class Renderer {
         let maxHeight = 0
     
         // push a fake left boundary
-        lifelines.push({ x: 0, index: 0, spacing: new Map(), dimensions: new Dimensions(0, 0) })
+        lifelines.push(new Lifeline())
     
         for (const participant of this._diagram.participants) {
             let el: G
@@ -117,20 +125,22 @@ export default class Renderer {
     
             const bbox = el.bbox()
             el.remove()
-            lifelines.push({
+            lifelines.push(new Lifeline({
                 x: offsetX,
                 index: lifelines.length,
-                spacing: new Map(),
                 dimensions: new Dimensions(bbox.width, bbox.height),
-                participant
-            })
+                participant,
+            }))
 
             maxHeight = Math.max(maxHeight, bbox.height)
             offsetX += bbox.width
         }
     
         // push a fake right boundary
-        lifelines.push({ x: offsetX, index: lifelines.length, spacing: new Map(), dimensions: new Dimensions(0, 0) })
+        lifelines.push(new Lifeline({
+            x: offsetX,
+            index: lifelines.length
+        }))
     
         Renderer.spaceLifeLines(lifelines)
         return { 
@@ -139,27 +149,41 @@ export default class Renderer {
         }
     }
 
+    private getLeftLifeline(participantMap: ParticipantMap, source: Participant, target: Participant) {
+        const sourceLifeline = participantMap.get(source)!
+        const targetLifeline = participantMap.get(target)!
+
+        return sourceLifeline.index < targetLifeline.index ? sourceLifeline : targetLifeline
+    }
+
     private layoutElements(lifelines: Lifeline[], participantMap: ParticipantMap) {
         const getIndex = (p: Participant): number => participantMap.get(p)!.index
 
         let elementY = 0
         for (const element of this._diagram.elements) {
             switch (element.type) {
-                case ElementTypes.message:
-                    console.log(element.modifier)
+                case ElementTypes.message: {
                     const isSelfMessage = element.source === element.target
-                    const d = isSelfMessage
-                        ? sizeSelfMessage(this._svg, element.text, this._options)
-                        : sizeMessage(this._svg, element.text, this._options)
+                    const left = this.getLeftLifeline(participantMap, element.source, element.target)
+                    // switch (element.modifier) {
+                    //     case "activate": left.activations++; break
+                    //     case "deactivate": left.activations--; break
+                    //     default: break
+                    // }
 
+                    const activationsPadding = left.activations * 10
                     if (isSelfMessage) {
-                        Renderer.setSpacing(lifelines, getIndex(element.source), getIndex(element.target) + 1, d.width)
+                        const d = sizeSelfMessage(this._svg, element.text, this._options)
+                        Renderer.setSpacing(lifelines, getIndex(element.source), getIndex(element.target) + 1, d.width + activationsPadding)
+                        elementY += d.height
                     } else {
-                        Renderer.setSpacing(lifelines, getIndex(element.source), getIndex(element.target), d.width)
+                        const d = sizeMessage(this._svg, this._markers, element, this._options)
+                        Renderer.setSpacing(lifelines, getIndex(element.source), getIndex(element.target), d.width + activationsPadding)
+                        elementY += d.height
                     }
-                    elementY += d.height
                     break
-                case ElementTypes.note:
+                }
+                case ElementTypes.note: {
                     const { overlap, textBoxOptions } = this._options.notes
                     const noteDimensions = sizeTextBox(this._svg, element.text, textBoxOptions)
                     const sourceIndex = getIndex(element.target[0])
@@ -180,6 +204,7 @@ export default class Renderer {
                     }
                     elementY += noteDimensions.height
                     break
+                }
             }
         }
 
@@ -202,18 +227,29 @@ export default class Renderer {
         group.rect(1, 1).fill("none").stroke("none").move(0,0)
         for (const element of this._diagram.elements) {
             switch (element.type) {
-                case ElementTypes.message:
+                case ElementTypes.message: {                
                     const source = participantMap.get(element.source)!
                     const target = participantMap.get(element.target)!
-                    const message = source === target
-                        ? drawSelfMessage(group, this._markers, element, source, this._options.messages)
-                        : drawMessage(group, this._markers, element, source, target, this._options.messages)
 
                     const left = source.index < target.index ? source : target
-                    message.translate(left.x + left.dimensions.cx, offsetY)
-                    offsetY += message.bbox().height
+                    // switch (element.modifier) {
+                    //     case "activate": left.activations++; break
+                    //     case "deactivate": left.activations--; break
+                    //     default: break
+                    // }
+
+                    let result: DrawMessageResult
+                    if (source !== target) {
+                        const width = Math.abs(source.cx - target.cx)
+                        result = drawMessage(group, this._markers, element, left.cx, offsetY, width, source.index < target.index, this._options.messages)
+                    } else {
+                        result = drawSelfMessage(group, this._markers, element, source, this._options.messages)
+                    }
+
+                    offsetY += result.group.bbox().height
                     break
-                case ElementTypes.note:
+                }
+                case ElementTypes.note: {
                     const noteSource = participantMap.get(element.target[0])!
 
                     switch (element.location) {
@@ -258,6 +294,7 @@ export default class Renderer {
                             break
                     }
                     break
+                }
             }
         }
         return group
@@ -327,7 +364,7 @@ export default class Renderer {
         
         // resize diagram
         const diagramHeight = offsetY + lifelinesGroup.bbox().height + this._options.padding
-        this._svg.size(diagramWidth, diagramHeight)
+        this._svg.size(diagramWidth+5000, diagramHeight+5000)
 
         // draw background
         this.renderBackground(diagramWidth, diagramHeight)

@@ -133,39 +133,55 @@ export function drawLifeline(svg: Svg | G, lifeline: Lifeline, height: number, i
 }
 
 export function drawArrow(svg: Svg | G, markers: any, path: Points, options: ArrowOptions) {
-    const group = svg.group()
     const { headType, ...lineOptions } = options
-    const polyline = drawLine(group, path, lineOptions)
+    const polyline = drawLine(svg, path, lineOptions)
     polyline.marker('end', markers[headType])
-    return group
+    return polyline
 }
 
-export function drawMessage(svg: Svg | G, markers: any, message: Message, source: Lifeline, target: Lifeline, options: MessageOptions): G {
-    const { fontOptions, padding, arrowOptions, arrowSpace, arrowHeight } = options
+export interface DrawMessageResult {
+    group: G
+    arrowTip: {
+        x: number,
+        y: number
+    }
+}
+
+export function drawMessage(svg: Svg | G, markers: any, message: Message, x: number, y: number, width: number, leftToRight: boolean, options: MessageOptions): DrawMessageResult {
+    const { fontOptions, padding, arrowOptions, arrowSpace } = options
     const { arrow: { head, line } } = message
     
-    const group = svg.group().move(0, 0)
-    let scx = source.x + source.dimensions.cx
-    let tcx = target.x + target.dimensions.cx
-    const mincx = Math.min(scx, tcx)
-    scx -= mincx
-    tcx -= mincx
+    const group = svg.group().attr({ class: "jasd-message" })
+    let offsetY = padding + y;
 
-    const width = Math.abs(scx - tcx)
-    const text = drawText(group, message.text, { align: Align.middle, ...fontOptions })
-    text.move(0,0).y(padding).cx(width / 2)
+    if (message.text && (message.text.trim() !== "")) {
+        const text = drawText(group, message.text, { align: Align.middle, ...fontOptions })
+        text.y(offsetY).cx(x + width / 2)
+        offsetY += text.bbox().height + arrowSpace
+    }
+    
+    const sx = leftToRight ? x : x + width
+    const tx = leftToRight ? x + width : x
+    const markerHeight = markers[message.arrow.head].attr("markerHeight") ?? 0
+    const halfArrowHeight = markerHeight / 2
 
-    const arrowY = text.bbox().height + padding + arrowSpace
-    drawArrow(group, markers, [[scx, arrowY], [tcx, arrowY]], {
+    drawArrow(group, markers, [[sx, offsetY+halfArrowHeight], [tx, offsetY+halfArrowHeight]], {
         ...arrowOptions, lineType: line, headType: head
     })
 
-    const tbbox = text.bbox()
-    group.rect(width, tbbox.height + arrowHeight + arrowSpace + (2 * padding)).fill("none").stroke("none").move(0, 0).back()
-    return group
+    offsetY += markerHeight + padding
+    group.rect(width, offsetY - y).fill("none").stroke("none").move(x, y).back()
+    
+    return {
+        group,
+        arrowTip: {
+            x: tx,
+            y: offsetY
+        }
+    }
 }
 
-export function drawSelfMessage(svg: Svg | G, markers: any, message: Message, source: Lifeline, options: MessageOptions): G {
+export function drawSelfMessage(svg: Svg | G, markers: any, message: Message, source: Lifeline, options: MessageOptions): DrawMessageResult {
     const { fontOptions, padding, arrowOptions, selfArrowWidth, arrowHeight } = options
     const { arrow: { head, line } } = message
 
@@ -187,5 +203,11 @@ export function drawSelfMessage(svg: Svg | G, markers: any, message: Message, so
 
     const tbbox = text.bbox()
     group.rect(tbbox.width + selfArrowWidth + halfArrowWidth, tbbox.height + 2 * padding).fill("none").stroke("none").move(0, 0).front()
-    return group
+    return  {
+        group,
+        arrowTip: {
+            x: 0,
+            y: arrowY + text.bbox().height - halfArrowWidth
+        }
+    }
 }
