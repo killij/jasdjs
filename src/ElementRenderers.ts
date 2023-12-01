@@ -165,7 +165,8 @@ export function drawMessage(svg: Svg | G, markers: any, message: Message, x: num
     const markerHeight = markers[message.arrow.head].attr("markerHeight") ?? 0
     const halfArrowHeight = markerHeight / 2
 
-    drawArrow(group, markers, [[sx, offsetY+halfArrowHeight], [tx, offsetY+halfArrowHeight]], {
+    const arrowTip = offsetY+halfArrowHeight
+    drawArrow(group, markers, [[sx, offsetY+halfArrowHeight], [tx, arrowTip]], {
         ...arrowOptions, lineType: line, headType: head
     })
 
@@ -176,7 +177,7 @@ export function drawMessage(svg: Svg | G, markers: any, message: Message, x: num
         group,
         arrowTip: {
             x: tx,
-            y: offsetY
+            y: arrowTip
         }
     }
 }
@@ -205,7 +206,7 @@ export function drawSelfMessage(svg: Svg | G, markers: any, message: Message, x:
     drawArrow(group, markers, points, { ...arrowOptions, lineType: line, headType: head })
 
     offsetY += padding
-    group.rect(width, offsetY - y).fill("none").stroke("red").move(x, y).back()
+    group.rect(width, offsetY - y).fill("none").stroke("none").move(x, y).back()
     return  {
         group,
         arrowTip: {

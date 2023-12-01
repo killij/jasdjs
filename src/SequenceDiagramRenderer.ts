@@ -20,13 +20,24 @@ interface LifeLines {
 
 type ParticipantMap = Map<Participant, Lifeline>
 
+export interface Activation {
+    startY: number,
+    endY: number,
+    count: number
+}
+
 export class Lifeline {
+    private _openActivations: Activation[] = []
+    private _closedActivations: Activation[] = []
+
     public x: number = 0
     public dimensions: Dimensions = Dimensions.None
     public spacing: Map<number, number> = new Map()
     public index: number = 0
     public participant?: Participant
     public activations: number = 0
+    public get openActivations() { return this._openActivations }
+    public get closedActivations() { return this._closedActivations }
     public get cx() {
         return this.x + this.dimensions.cx
     }
@@ -166,8 +177,8 @@ export default class Renderer {
                     const isSelfMessage = element.source === element.target
                     const left = this.getLeftLifeline(participantMap, element.source, element.target)
                     // switch (element.modifier) {
-                    //     case "activate": left.activations++; break
-                    //     case "deactivate": left.activations--; break
+                    //     case "activate": participantMap.get(element.target)!.activations++; break
+                    //     case "deactivate": participantMap.get(element.source)!.activations--; break
                     //     default: break
                     // }
 
@@ -221,9 +232,11 @@ export default class Renderer {
         return group
     }
 
-    private renderElements(participantMap: ParticipantMap): G {
+    private renderElements(participantMap: ParticipantMap, lifelines: Lifeline[]): G {
         const group = this._svg.group()
         let offsetY = 0
+        const activationWidth = 9
+        const halfActivationWidth = (activationWidth - 1) / 2 // detect if odd and sub 1 only if necessary
         group.rect(1, 1).fill("none").stroke("none").move(0,0)
         for (const element of this._diagram.elements) {
             switch (element.type) {
@@ -231,19 +244,58 @@ export default class Renderer {
                     const source = participantMap.get(element.source)!
                     const target = participantMap.get(element.target)!
 
-                    const left = source.index < target.index ? source : target
-                    // switch (element.modifier) {
-                    //     case "activate": left.activations++; break
-                    //     case "deactivate": left.activations--; break
-                    //     default: break
-                    // }
+                    if (element.modifier === "activate") {
+                        target.openActivations.push({
+                            startY: 0,
+                            endY: 0,
+                            count: target.openActivations.length
+                        })
+                    }
 
+                    const left = source.index < target.index ? source : target
+                    
                     let result: DrawMessageResult
                     if (source !== target) {
-                        const width = Math.abs(source.cx - target.cx)
-                        result = drawMessage(group, this._markers, element, left.cx, offsetY, width, source.index < target.index, this._options.messages)
+                        const leftToright = source.index < target.index
+                        let leftX = left.cx
+                        let width = Math.abs(source.cx - target.cx)
+
+                        if (source.openActivations.length > 0) {
+                            if (leftToright) {
+                                leftX += source.openActivations.length * halfActivationWidth
+                                width -= source.openActivations.length * halfActivationWidth
+                            } else {
+                                width -= halfActivationWidth
+                                width += halfActivationWidth * (source.openActivations.length - 1)
+                            }
+                        }
+
+                        if (target.openActivations.length > 0) {
+                            if (leftToright) {
+                                width -= halfActivationWidth
+                                width += halfActivationWidth * (target.openActivations.length - 1)
+                            } else {
+                                leftX += target.openActivations.length * halfActivationWidth
+                                width -= target.openActivations.length * halfActivationWidth
+                            }
+                        }
+                        
+                        result = drawMessage(group, this._markers, element, leftX, offsetY, width, source.index < target.index, this._options.messages)
                     } else {
                         result = drawSelfMessage(group, this._markers, element, left.cx, offsetY, this._options.messages)
+                    }
+
+                    if (element.modifier === "activate") {
+                        target.openActivations.at(-1)!.startY = result.arrowTip.y
+                    }
+
+                    if (element.modifier === "deactivate") {
+                        const activation = source.openActivations.pop()
+                        if (activation)
+                        {
+                            activation.endY = result.arrowTip.y
+                            source.closedActivations.push(activation)
+                        }
                     }
 
                     offsetY += result.group.bbox().height
@@ -297,6 +349,28 @@ export default class Renderer {
                 }
             }
         }
+
+
+        // render activations
+        for (const lifeline of lifelines) {
+
+            const layer = group.group().back()
+            //layer.opacity(0.1)
+            layer.rect(1, 1).move(0,0).fill("none").stroke("none")
+
+            // close off any left over activations
+            while (lifeline.openActivations.length > 0) {
+                const activation = lifeline.openActivations.pop()!
+                activation.endY = offsetY
+                lifeline.closedActivations.push(activation)
+            }
+
+            for (const { startY, endY, count } of lifeline.closedActivations) {
+                const offsetX = count * halfActivationWidth
+                layer.rect(activationWidth, endY - startY).y(startY).cx(lifeline.cx + offsetX).fill("#ADD8E6").stroke("black").attr({"stroke-width": "0.5"}).back()
+            }
+        }
+
         return group
     }
 
@@ -346,7 +420,7 @@ export default class Renderer {
         const lifelinesGroup = this.renderLifelines(lifelines, elementY, maxHeight)
         
         // elements draw
-        const elementsGroup = this.renderElements(participantMap)
+        const elementsGroup = this.renderElements(participantMap, lifelines)
         
         const diagramWidth = lifelines.at(-1)!.x + 2 * this._options.padding
         let offsetX = this._options.padding
