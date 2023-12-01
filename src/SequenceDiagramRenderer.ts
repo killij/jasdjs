@@ -350,14 +350,9 @@ export default class Renderer {
             }
         }
 
-
         // render activations
+        const layer = group.group().back().attr({id: "activationsLayer"})
         for (const lifeline of lifelines) {
-
-            const layer = group.group().back()
-            //layer.opacity(0.1)
-            layer.rect(1, 1).move(0,0).fill("none").stroke("none")
-
             // close off any left over activations
             while (lifeline.openActivations.length > 0) {
                 const activation = lifeline.openActivations.pop()!
