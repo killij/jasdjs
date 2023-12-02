@@ -4,7 +4,7 @@
 //
 
 import { G, Marker, SVG, Svg } from '@svgdotjs/svg.js'
-import { Participant, ParticipantTypes, ElementTypes, SequenceDiagram, NoteLocations, ArrowHeadTypes } from "./SequenceDiagramParser"
+import { Participant, ParticipantTypes, ElementTypes, SequenceDiagram, NoteLocations, ArrowHeadTypes, Message } from "./SequenceDiagramParser"
 import { Options, DeepPartial, DiagramOptions, BackgroundPattern, Align, defaultColour } from './Options'
 import { Dimensions } from './Dimensions'
 import { DrawMessageResult, drawActor, drawLifeline, drawMessage, drawSelfMessage, drawText, drawTextBox } from './ElementRenderers'
@@ -232,73 +232,75 @@ export default class Renderer {
         return group
     }
 
+    private renderMessage(group: G, element: Message, offsetY: number, participantMap: ParticipantMap): G {
+        const activationWidth = 9
+        const halfActivationWidth = (activationWidth - 1) / 2 // detect if odd and sub 1 only if necessary
+        const source = participantMap.get(element.source)!
+        const target = participantMap.get(element.target)!
+
+        if (element.activated) {
+            target.openActivations.push({ startY: 0, endY: 0, count: target.openActivations.length })
+        }
+
+        const left = source.index < target.index ? source : target
+        
+        let result: DrawMessageResult
+        if (source !== target) {
+            const leftToright = source.index < target.index
+            let leftX = left.cx
+            let width = Math.abs(source.cx - target.cx)
+            
+            if (source.openActivations.length > 0) {
+                const totalActivationWidth = source.openActivations.length * halfActivationWidth
+                if (leftToright) {
+                    leftX += totalActivationWidth
+                    width -= totalActivationWidth
+                } else {
+                    width += totalActivationWidth - activationWidth
+                }
+            }
+
+            if (target.openActivations.length > 0) {
+                const totalActivationWidth = target.openActivations.length * halfActivationWidth
+                if (leftToright) {
+                    width += totalActivationWidth - activationWidth
+                } else {
+                    leftX += totalActivationWidth
+                    width -= totalActivationWidth
+                }
+            }
+            
+            result = drawMessage(group, this._markers, element, leftX, offsetY, width, source.index < target.index, this._options.messages)
+        } else {
+            result = drawSelfMessage(group, this._markers, element, left.cx, offsetY, this._options.messages)
+        }
+
+        if (element.activated) {
+            target.openActivations.at(-1)!.startY = result.arrowTip.y
+        }
+
+        if (element.deactivated) {
+            const activation = source.openActivations.pop()
+            if (activation)
+            {
+                activation.endY = result.arrowTip.y
+                source.closedActivations.push(activation)
+            }
+        }
+
+        return result.group
+    }
+
     private renderElements(participantMap: ParticipantMap, lifelines: Lifeline[]): G {
         const group = this._svg.group()
         let offsetY = 0
         const activationWidth = 9
-        const halfActivationWidth = (activationWidth - 1) / 2 // detect if odd and sub 1 only if necessary
         group.rect(1, 1).fill("none").stroke("none").move(0,0)
         for (const element of this._diagram.elements) {
             switch (element.type) {
-                case ElementTypes.message: {                
-                    const source = participantMap.get(element.source)!
-                    const target = participantMap.get(element.target)!
-
-                    if (element.modifier === "activate") {
-                        target.openActivations.push({
-                            startY: 0,
-                            endY: 0,
-                            count: target.openActivations.length
-                        })
-                    }
-
-                    const left = source.index < target.index ? source : target
-                    
-                    let result: DrawMessageResult
-                    if (source !== target) {
-                        const leftToright = source.index < target.index
-                        let leftX = left.cx
-                        let width = Math.abs(source.cx - target.cx)
-
-                        if (source.openActivations.length > 0) {
-                            if (leftToright) {
-                                leftX += source.openActivations.length * halfActivationWidth
-                                width -= source.openActivations.length * halfActivationWidth
-                            } else {
-                                width -= halfActivationWidth
-                                width += halfActivationWidth * (source.openActivations.length - 1)
-                            }
-                        }
-
-                        if (target.openActivations.length > 0) {
-                            if (leftToright) {
-                                width -= halfActivationWidth
-                                width += halfActivationWidth * (target.openActivations.length - 1)
-                            } else {
-                                leftX += target.openActivations.length * halfActivationWidth
-                                width -= target.openActivations.length * halfActivationWidth
-                            }
-                        }
-                        
-                        result = drawMessage(group, this._markers, element, leftX, offsetY, width, source.index < target.index, this._options.messages)
-                    } else {
-                        result = drawSelfMessage(group, this._markers, element, left.cx, offsetY, this._options.messages)
-                    }
-
-                    if (element.modifier === "activate") {
-                        target.openActivations.at(-1)!.startY = result.arrowTip.y
-                    }
-
-                    if (element.modifier === "deactivate") {
-                        const activation = source.openActivations.pop()
-                        if (activation)
-                        {
-                            activation.endY = result.arrowTip.y
-                            source.closedActivations.push(activation)
-                        }
-                    }
-
-                    offsetY += result.group.bbox().height
+                case ElementTypes.message: {
+                    var mGroup = this.renderMessage(group, element, offsetY, participantMap)
+                    offsetY += mGroup.bbox().height
                     break
                 }
                 case ElementTypes.note: {
@@ -350,23 +352,27 @@ export default class Renderer {
             }
         }
 
-        // render activations
+        this.renderActivations(group, lifelines, offsetY, activationWidth)
+
+        return group
+    }
+
+    private renderActivations(group: G, lifelines: Lifeline[], endY: number, activationWidth: number) {
+        const halfActivationWidth = activationWidth / 2
         const layer = group.group().back().attr({id: "activationsLayer"})
         for (const lifeline of lifelines) {
             // close off any left over activations
             while (lifeline.openActivations.length > 0) {
                 const activation = lifeline.openActivations.pop()!
-                activation.endY = offsetY
+                activation.endY = endY
                 lifeline.closedActivations.push(activation)
             }
 
             for (const { startY, endY, count } of lifeline.closedActivations) {
                 const offsetX = count * halfActivationWidth
-                layer.rect(activationWidth, endY - startY).y(startY).cx(lifeline.cx + offsetX).fill("#ADD8E6").stroke("black").attr({"stroke-width": "0.5"}).back()
+                layer.rect(activationWidth, endY - startY).y(startY).cx(lifeline.cx + offsetX).fill("#AFECFD").stroke("black").attr({"stroke-width": "0.5"}).back()
             }
         }
-
-        return group
     }
 
     private renderTitle(offsetX: number, offsetY: number, totalWidth: number): G {

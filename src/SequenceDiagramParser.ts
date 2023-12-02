@@ -95,6 +95,8 @@ export interface Message {
     modifier?: string
     arrow: Arrow
     text: string
+    activated: boolean
+    deactivated: boolean
 }
 
 export interface Note {
@@ -165,7 +167,8 @@ export default function Parse(input: string): SequenceDiagram {
                         line: el.arrow.lineType
                     },
                     text: el.text,
-                    modifier: el.arrow.modifier
+                    activated: el.arrow.modifier === "activate",
+                    deactivated: el.arrow.modifier === "deactivate",
                 })
                 break
             }
