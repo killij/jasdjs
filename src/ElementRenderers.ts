@@ -141,9 +141,9 @@ export function drawArrow(svg: Svg | G, markers: any, path: Points, options: Arr
 
 export interface DrawMessageResult {
     group: G
-    arrowTip: {
-        x: number,
-        y: number
+    arrow: {
+        startY: number,
+        endY: number
     }
 }
 
@@ -165,8 +165,8 @@ export function drawMessage(svg: Svg | G, markers: any, message: Message, x: num
     const markerHeight = markers[message.arrow.head].attr("markerHeight") ?? 0
     const halfArrowHeight = markerHeight / 2
 
-    const arrowTip = offsetY+halfArrowHeight
-    drawArrow(group, markers, [[sx, offsetY+halfArrowHeight], [tx, arrowTip]], {
+    const arrowY = offsetY+halfArrowHeight
+    drawArrow(group, markers, [[sx, arrowY], [tx, arrowY]], {
         ...arrowOptions, lineType: line, headType: head
     })
 
@@ -175,14 +175,11 @@ export function drawMessage(svg: Svg | G, markers: any, message: Message, x: num
     
     return {
         group,
-        arrowTip: {
-            x: tx,
-            y: arrowTip
-        }
+        arrow: { startY: arrowY, endY: arrowY }
     }
 }
 
-export function drawSelfMessage(svg: Svg | G, markers: any, message: Message, x: number, y: number, options: MessageOptions): DrawMessageResult {
+export function drawSelfMessage(svg: Svg | G, markers: any, message: Message, startX: number, endX: number, y: number, options: MessageOptions): DrawMessageResult {
     const { fontOptions, padding, arrowOptions, selfArrowWidth } = options
     const { arrow: { head, line } } = message
     const group = svg.group().attr({ class: "jasd-self-message" })
@@ -192,26 +189,26 @@ export function drawSelfMessage(svg: Svg | G, markers: any, message: Message, x:
 
     if (message.text && (message.text.trim().length !== 0)) {
         const text = drawText(group, message.text, { align: Align.left, ...fontOptions })
-        text.move(x + selfArrowWidth + padding, offsetY)
+        text.move(startX + selfArrowWidth + padding, offsetY)
         offsetY += text.bbox().height
         width += text.bbox().width
     } else offsetY += 10
 
+    const startY = y + padding
+    const endY = offsetY
+
     const points: Points = [
-        [x, y + padding],
-        [x+ selfArrowWidth, y + padding],
-        [x+ selfArrowWidth, offsetY],
-        [x, offsetY]
+        [startX, startY],
+        [startX + selfArrowWidth, y + padding],
+        [startX + selfArrowWidth, offsetY],
+        [endX, endY]
     ]    
     drawArrow(group, markers, points, { ...arrowOptions, lineType: line, headType: head })
 
     offsetY += padding
-    group.rect(width, offsetY - y).fill("none").stroke("none").move(x, y).back()
+    group.rect(width, offsetY - y).fill("none").stroke("none").move(startX, y).back()
     return  {
         group,
-        arrowTip: {
-            x,
-            y: offsetY
-        }
+        arrow: { startY, endY }
     }
 }

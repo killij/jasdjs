@@ -176,12 +176,6 @@ export default class Renderer {
                 case ElementTypes.message: {
                     const isSelfMessage = element.source === element.target
                     const left = this.getLeftLifeline(participantMap, element.source, element.target)
-                    // switch (element.modifier) {
-                    //     case "activate": participantMap.get(element.target)!.activations++; break
-                    //     case "deactivate": participantMap.get(element.source)!.activations--; break
-                    //     default: break
-                    // }
-
                     const activationsPadding = left.activations * 10
                     if (isSelfMessage) {
                         const d = sizeSelfMessage(this._svg, element, this._options)
@@ -234,7 +228,7 @@ export default class Renderer {
 
     private renderMessage(group: G, element: Message, offsetY: number, participantMap: ParticipantMap): G {
         const activationWidth = 9
-        const halfActivationWidth = (activationWidth - 1) / 2 // detect if odd and sub 1 only if necessary
+        const halfActivationWidth = (activationWidth) / 2 // detect if odd and sub 1 only if necessary
         const source = participantMap.get(element.source)!
         const target = participantMap.get(element.target)!
 
@@ -272,18 +266,31 @@ export default class Renderer {
             
             result = drawMessage(group, this._markers, element, leftX, offsetY, width, source.index < target.index, this._options.messages)
         } else {
-            result = drawSelfMessage(group, this._markers, element, left.cx, offsetY, this._options.messages)
+            let startX = left.cx
+            let endX = left.cx
+
+            if (source.openActivations.length) {
+                let totalActivationWidth = source.openActivations.length * halfActivationWidth
+                if (element.activated) totalActivationWidth -= halfActivationWidth
+                startX += totalActivationWidth
+
+                endX += totalActivationWidth += halfActivationWidth
+                if (!element.activated) endX -= halfActivationWidth
+                if (element.deactivated) endX -= halfActivationWidth
+            }
+
+            result = drawSelfMessage(group, this._markers, element, startX, endX, offsetY, this._options.messages)
         }
 
         if (element.activated) {
-            target.openActivations.at(-1)!.startY = result.arrowTip.y
+            target.openActivations.at(-1)!.startY = result.arrow.endY
         }
 
         if (element.deactivated) {
             const activation = source.openActivations.pop()
             if (activation)
             {
-                activation.endY = result.arrowTip.y
+                activation.endY = source === target ? result.arrow.startY : result.arrow.endY
                 source.closedActivations.push(activation)
             }
         }
