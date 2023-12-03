@@ -363,7 +363,6 @@ export default class Renderer {
 
     private renderActivations(group: G, lifelines: Lifeline[], endY: number) {
         const options = this._options.messages.activations
-console.log("wwww")
         const layer = group.group().back().attr({id: "activationsLayer"})
         for (const lifeline of lifelines) {
             // close off any left over activations
