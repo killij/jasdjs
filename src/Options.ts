@@ -19,6 +19,26 @@ export enum Align {
 
 export type TextAlignment = keyof typeof Align
 
+export type OverriddenActivationOptions = Omit<ActivationOptions, "halfWidth">
+
+export class ActivationOptions {
+    private _halfWidth: number
+    
+    readonly fill: string = "#AFECFD"
+    readonly width: number = 9
+    readonly stroke: string = "black"
+    readonly strokeWidth: string = "0.5"
+
+    constructor(init?: Partial<OverriddenActivationOptions>) {
+        Object.assign(this, init)
+        this._halfWidth = this.width / 2
+    }
+
+    get halfWidth() {
+        return this._halfWidth
+    }
+}
+
 export type FontOptions = {
     family?: string
     size?: number
@@ -80,7 +100,8 @@ export type MessageOptions = {
     arrowSpace: number
     padding: number
     arrowHeight: number
-    selfArrowWidth: number
+    selfArrowWidth: number,
+    activations: ActivationOptions
 }
 
 export type NoteOptions = {
@@ -182,6 +203,7 @@ export class Options {
         arrowHeight: 8,
         selfArrowWidth: 30,
         arrowSpace: 5,
+        activations: new ActivationOptions()
     }
     
     private static _defaultDiagramOptions: DiagramOptions = {

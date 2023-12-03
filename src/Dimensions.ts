@@ -16,5 +16,5 @@ export class Dimensions {
         return this.width / 2
     }
 
-    public static readonly None: Dimensions = new Dimensions(-1, -1) 
+    public static readonly None: Dimensions = new Dimensions(0, 0) 
 }

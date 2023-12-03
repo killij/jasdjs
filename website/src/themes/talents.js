@@ -75,7 +75,9 @@ export default {
         fontOptions: {
             family: "Work Sans",
             fill: "#131743"
-        }
+        },
+        arrowSpace: 0,
+        padding: 5
     },
     background: talentBackground
 }
