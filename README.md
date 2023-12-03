@@ -77,6 +77,13 @@ a -> b: Solid line, closed head
 b -->> a: Dashed line, open head
 ```
 
+#### Activations
+Use a plus and minus signs (+/-) after an arrow to activate or deactivate a lifeline respectively.
+```
+a ->+ b: this activates b
+b ->- a: this deactivates b
+```
+
 ### Notes
 Notes can either be ```left of```, ```right of``` or ```over``` life lines.
 
@@ -101,6 +108,16 @@ Jack -> John: "This is a
 multiline message"
 note over Jack, John: "This is a
 multiline note"
+```
+
+## Comments
+Both single and multiline comments are supported
+```
+// single line comment
+
+/*
+Multiline
+comment */
 ```
 
 ## Sponsors
