@@ -13,11 +13,5 @@ export default function () {
                     <Route path="/tryitnow" element={<TryItNow />} />
                 </Routes>
             </HashRouter>
-        {/* <div style={{backgroundColor: "red"}}>
-        </div> */}
-        {/* <div style={{display: "flex", flexDirection: "row", flexGrow: 1}}>
-            <div style={{width: "200px", backgroundColor: "blue"}}></div>
-            <div style={{flexGrow:1}}></div>
-        </div> */}
     </div>)
 }

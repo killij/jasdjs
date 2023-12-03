@@ -7,6 +7,7 @@ import Header from "./Header"
 import TalentTheme from "./themes/talents"
 import BasicTheme from "./themes/basic"
 import './TryItNow.css'
+import debounce from "lodash.debounce"
 
 function getTheme(id: string) {
     switch (id) {
@@ -27,6 +28,19 @@ note over j: "What a nice chap,
 thought John"
 `
 
+function renderDiagram(text: string, theme: object) {
+    try {
+        const sd = Parse(text)
+        const el = document.getElementById("diagram")!
+        const renderer = new Renderer(sd, el, theme)
+        renderer.render()
+    } catch (err) {
+        console.log(err)
+    }
+}
+
+const debouncedRenderDiagram = debounce(renderDiagram, 500)
+
 export default function TryItNow() {
     const [text, setText] = useState(() => {
         const value = window.localStorage.getItem("jasd-document")
@@ -39,29 +53,21 @@ export default function TryItNow() {
     const [theme, setTheme] = useState(getTheme(themeId))
 
     const handleThemeSelect = useCallback((key: string) => {
-        setThemeId(key)
         window.localStorage.setItem("jasd-theme", key)
-    }, [setThemeId])
+        setThemeId(key)
+        setTheme(getTheme(key))
+        renderDiagram(text, getTheme(key))
+    }, [setThemeId, setTheme, text])
 
     const handleDocumentChange = useCallback((text: string) => {
-        setText(text)
         window.localStorage.setItem("jasd-document", text)
-    }, [setText])
+        setText(text)
+        debouncedRenderDiagram(text, theme)
+    }, [setText, theme])
 
     useEffect(() => {
-        setTheme(getTheme(themeId))
-    }, [themeId, setTheme])
-
-    useEffect(() => {
-        try {
-            const sd = Parse(text)
-            const el = document.getElementById("diagram")!
-            const renderer = new Renderer(sd, el, theme)
-            renderer.render()
-        } catch (err) {
-            console.log(err)
-        }
-    }, [theme, text])
+        renderDiagram(text, theme)
+    }, [])
 
     return (
     <>

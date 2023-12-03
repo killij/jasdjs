@@ -6,7 +6,8 @@
   "dependencies": {
     "ace-builds": "^1.31.2",
     "bootstrap": "^5.3.2",
-    "jasdjs": "^1.0.0-pre.3",
+    "jasdjs": "^1.0.0-pre.4",
+    "lodash.debounce": "^4.0.8",
     "react": "^18.2.0",
     "react-ace": "^10.1.0",
     "react-bootstrap": "^2.9.1",
@@ -37,6 +38,7 @@
     ]
   },
   "devDependencies": {
+    "@types/lodash.debounce": "^4.0.9",
     "@types/node": "^20.9.4",
     "@types/react": "^18.2.38",
     "@types/react-color": "^3.0.10",
