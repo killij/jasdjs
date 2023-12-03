@@ -5,7 +5,7 @@
 
 import { G, Marker, SVG, Svg } from '@svgdotjs/svg.js'
 import { Participant, ParticipantTypes, ElementTypes, SequenceDiagram, NoteLocations, ArrowHeadTypes, Message } from "./SequenceDiagramParser"
-import { Options, DeepPartial, DiagramOptions, BackgroundPattern, Align, defaultColour } from './Options'
+import { Options, DeepPartial, DiagramOptions, BackgroundPattern, Align, defaultColour, ActivationOptions } from './Options'
 import { Dimensions } from './Dimensions'
 import { DrawMessageResult, drawActor, drawLifeline, drawMessage, drawSelfMessage, drawText, drawTextBox } from './ElementRenderers'
 import { sizeMessage, sizeSelfMessage, sizeTextBox } from './ElementSizers'
@@ -227,8 +227,7 @@ export default class Renderer {
     }
 
     private renderMessage(group: G, element: Message, offsetY: number, participantMap: ParticipantMap): G {
-        const activationWidth = 9
-        const halfActivationWidth = (activationWidth) / 2 // detect if odd and sub 1 only if necessary
+        const activationOptions = this._options.messages.activations
         const source = participantMap.get(element.source)!
         const target = participantMap.get(element.target)!
 
@@ -245,19 +244,19 @@ export default class Renderer {
             let width = Math.abs(source.cx - target.cx)
             
             if (source.openActivations.length > 0) {
-                const totalActivationWidth = source.openActivations.length * halfActivationWidth
+                const totalActivationWidth = source.openActivations.length * activationOptions.halfWidth
                 if (leftToright) {
                     leftX += totalActivationWidth
                     width -= totalActivationWidth
                 } else {
-                    width += totalActivationWidth - activationWidth
+                    width += totalActivationWidth - activationOptions.width
                 }
             }
 
             if (target.openActivations.length > 0) {
-                const totalActivationWidth = target.openActivations.length * halfActivationWidth
+                const totalActivationWidth = target.openActivations.length * activationOptions.halfWidth
                 if (leftToright) {
-                    width += totalActivationWidth - activationWidth
+                    width += totalActivationWidth - activationOptions.width
                 } else {
                     leftX += totalActivationWidth
                     width -= totalActivationWidth
@@ -270,13 +269,13 @@ export default class Renderer {
             let endX = left.cx
 
             if (source.openActivations.length) {
-                let totalActivationWidth = source.openActivations.length * halfActivationWidth
-                if (element.activated) totalActivationWidth -= halfActivationWidth
+                let totalActivationWidth = source.openActivations.length * activationOptions.halfWidth
+                if (element.activated) totalActivationWidth -= activationOptions.halfWidth
                 startX += totalActivationWidth
 
-                endX += totalActivationWidth += halfActivationWidth
-                if (!element.activated) endX -= halfActivationWidth
-                if (element.deactivated) endX -= halfActivationWidth
+                endX += totalActivationWidth += activationOptions.halfWidth
+                if (!element.activated) endX -= activationOptions.halfWidth
+                if (element.deactivated) endX -= activationOptions.halfWidth
             }
 
             result = drawSelfMessage(group, this._markers, element, startX, endX, offsetY, this._options.messages)
@@ -301,7 +300,6 @@ export default class Renderer {
     private renderElements(participantMap: ParticipantMap, lifelines: Lifeline[]): G {
         const group = this._svg.group()
         let offsetY = 0
-        const activationWidth = 9
         group.rect(1, 1).fill("none").stroke("none").move(0,0)
         for (const element of this._diagram.elements) {
             switch (element.type) {
@@ -359,13 +357,13 @@ export default class Renderer {
             }
         }
 
-        this.renderActivations(group, lifelines, offsetY, activationWidth)
-
+        this.renderActivations(group, lifelines, offsetY)
         return group
     }
 
-    private renderActivations(group: G, lifelines: Lifeline[], endY: number, activationWidth: number) {
-        const halfActivationWidth = activationWidth / 2
+    private renderActivations(group: G, lifelines: Lifeline[], endY: number) {
+        const options = this._options.messages.activations
+console.log("wwww")
         const layer = group.group().back().attr({id: "activationsLayer"})
         for (const lifeline of lifelines) {
             // close off any left over activations
@@ -376,8 +374,14 @@ export default class Renderer {
             }
 
             for (const { startY, endY, count } of lifeline.closedActivations) {
-                const offsetX = count * halfActivationWidth
-                layer.rect(activationWidth, endY - startY).y(startY).cx(lifeline.cx + offsetX).fill("#AFECFD").stroke("black").attr({"stroke-width": "0.5"}).back()
+                const offsetX = count * options.halfWidth
+                layer
+                    .rect(options.width, endY - startY)
+                    .y(startY).cx(lifeline.cx + offsetX)
+                    .fill(options.fill)
+                    .stroke(options.stroke)
+                    .attr({"stroke-width": options.strokeWidth})
+                    .back()
             }
         }
     }
@@ -446,7 +450,7 @@ export default class Renderer {
         
         // resize diagram
         const diagramHeight = offsetY + lifelinesGroup.bbox().height + this._options.padding
-        this._svg.size(diagramWidth+5000, diagramHeight+5000)
+        this._svg.size(diagramWidth, diagramHeight)
 
         // draw background
         this.renderBackground(diagramWidth, diagramHeight)
