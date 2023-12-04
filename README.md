@@ -19,11 +19,11 @@ multiline text too"
 note over A, C: Oh and notes can span over two lifelines too
 ```
 
-<img src="images/example-1.png" width="350">
+<img src="images/example-1.png" width="450">
 
 JASDjs is allows you to create visually appealing documentation for your organisation.
 
-<img src="images/example-2.png" width="350">
+<img src="images/example-2.png" width="450">
 
 [Try it out online here.](https://killij.github.io/jasdjs)
 
