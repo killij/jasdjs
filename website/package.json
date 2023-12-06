@@ -6,7 +6,7 @@
   "dependencies": {
     "ace-builds": "^1.31.2",
     "bootstrap": "^5.3.2",
-    "jasdjs": "^1.0.0-pre.4",
+    "jasdjs": "^1.0.0-pre.5",
     "lodash.debounce": "^4.0.8",
     "react": "^18.2.0",
     "react-ace": "^10.1.0",
