@@ -1,8 +1,10 @@
-function talentBackground(draw, width, height) {
+import { OptionOverrides } from "jasdjs"
+
+function talentBackground(draw: any, width: number, height: number) {
     const group = draw.group()
     const logoGroup = group.group()
 
-    const patternFunc = (add) => {
+    const patternFunc = (add: any) => {
         // attr: https://philiprogers.com/svgpatterns/#honeycomb
         add.rect(56, 100).fill('#fff')
         add.path('M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100').fill('none').stroke('#131743').attr({"stroke-width": 2}).opacity(0.02)
@@ -54,56 +56,52 @@ function talentBackground(draw, width, height) {
     return group
 }
 
-export default {
-    padding: 20,
+const theme: OptionOverrides = {
+    defaultFont: {
+        family: "Work Sans"
+    },    
     title: {
-        paddingBottom: 20,
-        textOptions: {
-            align: "right",
-            family: "Work Sans",
+        align: "right",
+        font: {
             size: 36,
-            fill: "#131743",
+            color: "#131743",
             weight: "bold"
         }
     },
     notes: {
-        name: "jasd-note",
-        textBoxOptions: {
-            margin: 7,
-            textOptions: {
-                family: "Work Sans"
-            }
-
+        box: {
+            margin: 7
         }
     },
-    lifelines: {
-        textBoxOptions: {
-            rounding: 4,
+    participants: {
+        box: {
+            cornerRounding: 4,
             padding: 10,
             margin: 7,
-            fill: "#fafafa",
-            textOptions: {
-                family: "Work Sans",
-                size: 16,
+            backgroundColor: "#fafafa",
+            font: {
+                size: 16
             },
-            strokeOptions: {
+            stroke: {
                 width: 1,
-                fill: "#777"
+                color: "#777"
             }
         },
-        lineOptions: {
-            fill: "#777",
-            lineType: "dashed",
-            dashStyle: "16 2"
+        lifeline: {
+            color: "#777",
+            dashStyle: "16 2",
         }
     },
     messages: {
-        fontOptions: {
-            family: "Work Sans",
-            fill: "#131743"
+        padding: 5,
+        font: {
+            color: "#131743"
         },
-        arrowSpace: 0,
-        padding: 5
+        arrow: {
+            paddingTop: 0
+        }
     },
     background: talentBackground
 }
+
+export default theme

@@ -4,7 +4,7 @@ import "ace-builds/src-noconflict/theme-xcode"
 import { Parse, Renderer } from "jasdjs"
 import Toolbar from "./Toolbar"
 import Header from "./Header"
-import TalentTheme from "./themes/talents"
+import TalentTheme from "./themes/talent"
 import BasicTheme from "./themes/basic"
 import './TryItNow.css'
 import debounce from "lodash.debounce"
