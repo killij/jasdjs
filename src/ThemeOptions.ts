@@ -1,73 +1,19 @@
-import { DeepPartial, FontOptions, TextAlignment } from "./Options"
+//
+// Copyright (c) James Killick and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for details.
+//
 
-interface StrokeOptions {
-    readonly color: string,
-    readonly width: string
-}
+import { ActivationOptions, ArrowOptions, Background, BackgroundCallback, BackgroundColor, BackgroundPattern, DiagramOptions, FontOptions, LifelineOptions, MessageOptions, NoteOptions, OptionOverrides, ParticipantOptions, StrokeOptions, TextAlignment, TextboxOptions, TitleOptions } from "./Options"
 
-interface TextboxOptions {
-    readonly backgroundColor: string
-    readonly cornerRounding: string
-    readonly font: FontOptions
-    readonly margin: string
-    readonly padding: string
-    readonly stroke: StrokeOptions
-    readonly textAlign: TextAlignment
-}
+export const defaultColour = "#000"
+export const defaultContrastColour = "#fff"
 
-interface LifelineOptions {
-    readonly color: string
-    readonly dashStyle?: string
-    readonly width: string
-}
+export type DeepPartial<T> = Partial<{ [P in keyof T]: DeepPartial<T[P]> }>
 
-interface ParticipantOptions {
-    readonly box: TextboxOptions
-    readonly lifeline: LifelineOptions
-}
-
-interface TitleOptions {
-    readonly align: TextAlignment
-    readonly font: FontOptions
-}
-
-interface NoteOptions {
-    readonly box: TextboxOptions
-    readonly overlap: number
-}
-
-interface ArrowOptions {
-    readonly color: string
-    readonly paddingTop: string
-    readonly width: string
-}
-
-interface MessageOptions {
-    readonly arrow: ArrowOptions
-    readonly font: FontOptions
-    readonly padding: string
-}
-
-interface ActivationOptions {
-    readonly backgroundColor: string
-    readonly stroke: StrokeOptions
-    readonly width: number
-}
-
-interface Options {
-    readonly activations: ActivationOptions
-    readonly defaultFont: FontOptions
-    readonly messages: MessageOptions
-    readonly notes: NoteOptions
-    readonly padding: string
-    readonly participants: ParticipantOptions
-    readonly title: TitleOptions
-}
-
-class ThemeFontOptions implements FontOptions {
-    readonly color: string = "black"
+export class ThemeFontOptions implements FontOptions {
+    readonly color: string = defaultColour
     readonly family: string = "Courier New"
-    readonly size: string = "16"
+    readonly size: number = 12
     readonly weight: string = "normal"
 
     getAttr() {
@@ -87,46 +33,67 @@ class ThemeFontOptions implements FontOptions {
     }
 }
 
-class ThemeStrokeOptions implements StrokeOptions {
-    readonly color: string = "black"
-    readonly width: string = "1"
+export class ThemeStrokeOptions implements StrokeOptions {
+    readonly color: string = defaultColour
+    readonly width: number = 1
 
     constructor(init?: Partial<StrokeOptions>) {
         this.color = init?.color ?? this.color
         this.width = init?.width ?? this.width
     }
-}
 
-class ThemeTextboxOptions implements TextboxOptions {
-    readonly backgroundColor: string = "white"
-    readonly stroke: StrokeOptions
-    readonly margin: string = "5"
-    readonly padding: string = "5"
-    readonly font: FontOptions
-    readonly textAlign: TextAlignment = "middle"
-    readonly cornerRounding: string = "3"
-
-    constructor(init?: DeepPartial<TextboxOptions>, defaultFont?: ThemeFontOptions) {
-        this.font = new ThemeFontOptions(Object.assign({}, defaultFont, { size: 36 }, init?.font))
-        this.stroke = new ThemeStrokeOptions(init?.font)
+    getAttr() {
+        return {
+            color: this.color,
+            width: this.width
+        }
     }
 }
 
-class ThemeLifelineOptions implements LifelineOptions {
-    readonly width: string = "1"
-    readonly color: string = "black"
+export class ThemeTextboxOptions implements TextboxOptions {
+    readonly backgroundColor: string = defaultContrastColour
+    readonly stroke: ThemeStrokeOptions
+    readonly margin: number = 5
+    readonly padding: number = 6
+    readonly font: ThemeFontOptions
+    readonly textAlign: TextAlignment = "middle"
+    readonly cornerRounding: number = 7
+
+    constructor(init?: DeepPartial<TextboxOptions>, defaultFont?: ThemeFontOptions) {
+        this.backgroundColor = init?.backgroundColor ?? this.backgroundColor
+        this.stroke = new ThemeStrokeOptions(init?.font)
+        this.margin = init?.margin ?? this.margin
+        this.padding = init?.padding ?? this.padding
+        this.font = new ThemeFontOptions(Object.assign({}, defaultFont, init?.font))
+        this.textAlign = init?.textAlign ?? this.textAlign
+        this.cornerRounding = init?.cornerRounding ?? this.cornerRounding
+    }
+
+    boxAttr() {
+        return {
+            fill: this.backgroundColor,
+            stroke: this.stroke.color,
+            "stroke-width": this.stroke.width,
+            rx: this.cornerRounding
+        }
+    }
+}
+
+export class ThemeLifelineOptions implements LifelineOptions {
+    readonly width: number = 1
+    readonly color: string = defaultColour
     readonly dashStyle?: string
 
     constructor(init?: Partial<LifelineOptions>) {
         this.width = init?.width ?? this.width
         this.color = init?.color ?? this.color
-        this.dashStyle = init?.dashStyle ?? this.width
+        this.dashStyle = init?.dashStyle ?? this.dashStyle
     }
 }
 
-class ThemeParticipantOptions implements ParticipantOptions {
-    readonly box: TextboxOptions
-    readonly lifeline: LifelineOptions
+export class ThemeParticipantOptions implements ParticipantOptions {
+    readonly box: ThemeTextboxOptions
+    readonly lifeline: ThemeLifelineOptions
 
     constructor(init?: DeepPartial<ParticipantOptions>, defaultFont?: ThemeFontOptions) {
         this.box = new ThemeTextboxOptions(init?.box, defaultFont)
@@ -138,7 +105,7 @@ export class ThemeActivationOptions implements ActivationOptions {
     private _halfWidth: number
 
     readonly backgroundColor: string = "#AFECFD"
-    readonly stroke: StrokeOptions
+    readonly stroke: ThemeStrokeOptions
     readonly width: number = 9
 
     constructor(init?: DeepPartial<ActivationOptions>) {
@@ -154,42 +121,52 @@ export class ThemeActivationOptions implements ActivationOptions {
     }
 }
 
-class ThemeNoteOptions implements NoteOptions {
-    readonly box: TextboxOptions
-    readonly overlap: number = 10
+export class ThemeNoteOptions implements NoteOptions {
+    readonly box: ThemeTextboxOptions
+    readonly overlap: number = 20
 
     constructor(init?: DeepPartial<NoteOptions>, defaultFont?: ThemeFontOptions) {
-        this.box = new ThemeTextboxOptions(init?.box, defaultFont)
+        let defs: DeepPartial<TextboxOptions> = Object.assign({}, {
+            backgroundColor: "#feffeb",
+            cornerRounding: 0,
+        },
+        init?.box)
+        this.box = new ThemeTextboxOptions(defs, defaultFont)
         this.overlap = init?.overlap ?? this.overlap
     }
 }
 
-class ThemeTitleOptions implements TitleOptions {
+export class ThemeTitleOptions implements TitleOptions {
     readonly align: TextAlignment = "middle"
     readonly font: ThemeFontOptions
+    readonly paddingBottom: number = 20
 
     constructor (init?: DeepPartial<TitleOptions>, defaultFont?: ThemeFontOptions) {
         this.align = init?.align ?? this.align
-        this.font = new ThemeFontOptions(Object.assign({}, defaultFont, { size: 36 }, init?.font ))
+        this.paddingBottom = init?.paddingBottom ?? this.paddingBottom
+        this.font = new ThemeFontOptions(Object.assign({}, defaultFont, { size: 18 }, init?.font ))
     }
 }
 
-class ThemeArrowOptions implements ArrowOptions {
-    readonly color: string = "black"
-    readonly width: string = "1"
-    readonly paddingTop: string = "5"
+export class ThemeArrowOptions implements ArrowOptions {
+    readonly color: string = defaultColour
+    readonly width: number = 1
+    readonly paddingTop: number = 5
+    readonly dashStyle: string = "4"
 
     constructor(init?: Partial<ArrowOptions>) {
         this.color = init?.color ?? this.color
         this.width = init?.width ?? this.width
         this.paddingTop = init?.paddingTop ?? this.paddingTop
+        this.dashStyle = init?.dashStyle ?? this.dashStyle
     }
 }
 
-class ThemeMessageOptions implements MessageOptions {
-    readonly padding: string = "5"
-    readonly font: FontOptions
-    readonly arrow: ArrowOptions
+export class ThemeMessageOptions implements MessageOptions {
+    readonly padding: number = 3
+    readonly font: ThemeFontOptions
+    readonly arrow: ThemeArrowOptions
+    readonly selfArrowWidth: number = 30
 
     constructor(init?: DeepPartial<MessageOptions>, defaultFont?: ThemeFontOptions) {
         this.padding = init?.padding ?? this.padding
@@ -198,16 +175,18 @@ class ThemeMessageOptions implements MessageOptions {
     }
 }
 
-export class ThemeOptions implements Options {
+
+export class ThemeOptions implements DiagramOptions {
     readonly title: ThemeTitleOptions
     readonly messages: ThemeMessageOptions
     readonly notes: ThemeNoteOptions
     readonly participants: ThemeParticipantOptions
     readonly activations: ThemeActivationOptions
-    readonly padding: string = "20"
+    readonly padding: number = 20
     readonly defaultFont: ThemeFontOptions
+    readonly background?: Background
 
-    constructor(init?: DeepPartial<Options>) {
+    constructor(init?: OptionOverrides) {
         this.padding = init?.padding ?? this.padding
         this.defaultFont = new ThemeFontOptions(init?.defaultFont)
         this.title = new ThemeTitleOptions(init?.title, this.defaultFont)
@@ -215,8 +194,6 @@ export class ThemeOptions implements Options {
         this.notes = new ThemeNoteOptions(init?.notes, this.defaultFont)
         this.messages = new ThemeMessageOptions(init?.messages, this.defaultFont)
         this.activations = new ThemeActivationOptions(init?.activations)
+        this.background = init?.background
     }
 }
-
-var themeOptions = new ThemeOptions()
-console.log("*** theme options ***", JSON.stringify(themeOptions, null, 4))

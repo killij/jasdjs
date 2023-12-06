@@ -3,13 +3,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 //
 
-import merge from "lodash.merge"
-import { ArrowHeadTypes, ArrowLineTypes } from "./SequenceDiagramParser"
-import { G, Marker, Svg } from "@svgdotjs/svg.js"
-import { Pattern } from "@svgdotjs/svg.js"
-
-export const defaultColour = "#000"
-export const defaultContrastColour = "#fff"
+import { G, Pattern, Svg } from "@svgdotjs/svg.js"
+import { DeepPartial } from "./ThemeOptions"
 
 export enum Align {
     middle = 'middle',
@@ -19,102 +14,74 @@ export enum Align {
 
 export type TextAlignment = keyof typeof Align
 
-export type OverriddenActivationOptions = Omit<ActivationOptions, "halfWidth">
-
-export class ActivationOptions {
-    private _halfWidth: number
-    
-    readonly fill: string = "#AFECFD"
-    readonly width: number = 9
-    readonly stroke: string = "black"
-    readonly strokeWidth: string = "0.5"
-
-    constructor(init?: Partial<OverriddenActivationOptions>) {
-        Object.assign(this, init)
-        this._halfWidth = this.width / 2
-    }
-
-    get halfWidth() {
-        return this._halfWidth
-    }
+export interface FontOptions {
+    readonly family: string
+    readonly color: string
+    readonly size: number
+    readonly weight: string
 }
 
-export type FontOptions = {
-    family?: string
-    size?: number
-    weight?: string
-    fill?: string
+export interface StrokeOptions {
+    readonly color: string,
+    readonly width: number
 }
 
-export type StrokeOptions = {
-    width: number,
-    fill: string
+export interface TextboxOptions {
+    readonly backgroundColor: string
+    readonly cornerRounding: number
+    readonly font: FontOptions
+    readonly margin: number
+    readonly padding: number
+    readonly stroke: StrokeOptions
+    readonly textAlign: TextAlignment
 }
 
-export type TextOptions = FontOptions & {
-    align?: TextAlignment
+export interface LifelineOptions {
+    readonly color: string
+    readonly dashStyle?: string
+    readonly width: number
 }
 
-export type TextBoxOptions = {
-    name?: string
-    fill?: string
-    rounding?: number
-    margin: number
-    padding: number
-    textOptions: TextOptions
-    strokeOptions: StrokeOptions
-    icon?: Marker
+export interface ParticipantOptions {
+    readonly box: TextboxOptions
+    readonly lifeline: LifelineOptions
 }
 
-export type LineOptions = {
-    fill: string
-    width: number
-    dashStyle?: string
-    lineType?: ArrowLineTypes
+export interface TitleOptions {
+    readonly align: TextAlignment
+    readonly font: FontOptions
+    readonly paddingBottom: number
 }
 
-export type ArrowOptions = LineOptions & {
-    headType: ArrowHeadTypes
+export interface NoteOptions {
+    readonly box: TextboxOptions
+    readonly overlap: number
 }
 
-export type TitleOptions = {
-    textOptions: TextOptions
-    paddingBottom: number
+export interface ArrowOptions {
+    readonly color: string
+    readonly paddingTop: number
+    readonly width: number
+    readonly dashStyle: string
 }
 
-export type IconOptions = {
-    height: number
-    width: number
-    paddingRight: number
+export interface MessageOptions {
+    readonly arrow: ArrowOptions
+    readonly font: FontOptions
+    readonly padding: number
 }
 
-export type LifelineOptions = {
-    textBoxOptions: TextBoxOptions
-    lineOptions: LineOptions
-    iconOptions: IconOptions
+export interface ActivationOptions {
+    readonly backgroundColor: string
+    readonly stroke: StrokeOptions
+    readonly width: number
 }
 
-export type MessageOptions = {
-    fontOptions: FontOptions
-    arrowOptions: ArrowOptions
-    arrowSpace: number
-    padding: number
-    arrowHeight: number
-    selfArrowWidth: number,
-    activations: ActivationOptions
-}
-
-export type NoteOptions = {
-    name?: string
-    textBoxOptions: TextBoxOptions
-    overlap: number
-}
-
-export type BackgroundColor = {
+export interface BackgroundColor {
     color: string
 }
 
-export type BackgroundPattern = {
+export interface BackgroundPattern {
     pattern: {
         width: number
         height: number
@@ -124,98 +91,17 @@ export type BackgroundPattern = {
 
 export type BackgroundCallback = (svg: Svg, width: number, height: number) => G
 
-export type DiagramOptions = {
-    padding: number
-    title: TitleOptions
-    messages: MessageOptions
-    lifelines: LifelineOptions
-    notes: NoteOptions
-    background: BackgroundColor | BackgroundPattern | BackgroundCallback | undefined
+export type Background = BackgroundColor | BackgroundPattern | BackgroundCallback
+
+export interface DiagramOptions {
+    readonly activations: ActivationOptions
+    readonly defaultFont: FontOptions
+    readonly messages: MessageOptions
+    readonly notes: NoteOptions
+    readonly padding: number
+    readonly participants: ParticipantOptions
+    readonly title: TitleOptions
+    readonly background?: Background
 }
 
-export type DeepPartial<T> = Partial<{ [P in keyof T]: DeepPartial<T[P]> }>
-
-export class Options {
-    private static _defaultIconOptions: IconOptions = {
-        width: 15,
-        height: 15,
-        paddingRight: 5
-    }
-
-    private static _defaultFontOptions: FontOptions = {
-        family: "Courier New",
-        size: 12,
-        fill: "black",
-    }
-
-    private static _defaultStrokeOptions: StrokeOptions = {
-        fill: "black",
-        width: 1,
-    }
-
-    private static _defaultTextBoxOptions: TextBoxOptions = {
-        fill: '#fff',
-        margin: 5,
-        padding: 6,
-        rounding: 7,
-
-        textOptions: {
-            align: Align.middle,
-            ...this._defaultFontOptions
-        },
-        strokeOptions: {
-            ...this._defaultStrokeOptions
-        }
-    }
-
-    private static _defaultNoteOptions: NoteOptions = {
-        textBoxOptions: merge({}, this._defaultTextBoxOptions, { fill: '#feffeb', rounding: 0 }),
-        overlap: 20
-    }
-
-    private static _defaultTitleOptions: TitleOptions = {
-        paddingBottom: 20,
-        textOptions: Object.assign({ align: Align.right, ...this._defaultFontOptions }, { size: 18 })
-    }
-
-    private static _defaultLineOptions: LineOptions = {
-        fill: "black",
-        width: 1,
-        dashStyle: "4",
-        lineType: ArrowLineTypes.solid
-    }
-
-    private static _defaultArrowOptions: ArrowOptions = {
-        headType: ArrowHeadTypes.closed,
-        ...this._defaultLineOptions
-    }
-
-    private static _defaultLifelineOptions: LifelineOptions = {
-        lineOptions: this._defaultLineOptions,
-        textBoxOptions: this._defaultTextBoxOptions,
-        iconOptions: this._defaultIconOptions,
-    }
-
-    private static _defaultMessageOptions: MessageOptions = {
-        fontOptions: this._defaultFontOptions,
-        arrowOptions: this._defaultArrowOptions,
-        padding: 3,
-        arrowHeight: 8,
-        selfArrowWidth: 30,
-        arrowSpace: 5,
-        activations: new ActivationOptions()
-    }
-    
-    private static _defaultDiagramOptions: DiagramOptions = {
-        padding: 20,
-        lifelines: this._defaultLifelineOptions,
-        messages: this._defaultMessageOptions,
-        title: this._defaultTitleOptions,
-        notes: this._defaultNoteOptions,
-        background: undefined
-    }
-
-    public static From(options: DeepPartial<DiagramOptions>): DiagramOptions {
-        return merge({}, this._defaultDiagramOptions, options ?? {})
-    }
-}
+export type OptionOverrides = DeepPartial<Omit<DiagramOptions, "background">> & { background?: Background }

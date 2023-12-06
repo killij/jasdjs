@@ -6,18 +6,19 @@
 import { Svg } from "@svgdotjs/svg.js";
 import { Dimensions } from "./Dimensions";
 import { drawText } from "./ElementRenderers";
-import { Align, DiagramOptions, TextBoxOptions } from "./Options";
+import { Align, DiagramOptions, TextboxOptions } from "./Options";
 import { Message } from "./SequenceDiagramParser";
+import { ThemeMessageOptions, ThemeOptions, ThemeTextboxOptions } from "./ThemeOptions";
 
-export function sizeMessage(svg: Svg, markers: any, message: Message, options: DiagramOptions) {
-    const { messages: { fontOptions, padding, arrowSpace } } = options
+export function sizeMessage(svg: Svg, markers: any, message: Message, options: ThemeMessageOptions) {
+    const { font, padding, arrow } = options
     let height = 2 * padding
     let width = height
 
     if (message.text && (message.text.trim() !== "")) {
-        const text = drawText(svg, message.text, { align: Align.middle, ...fontOptions }) 
+        const text = drawText(svg, message.text, Align.middle, font)
         const bbox = text.bbox()
-        height += bbox.height + arrowSpace
+        height += bbox.height + arrow.paddingTop
         width += bbox.width
         text.remove()
     }
@@ -27,13 +28,13 @@ export function sizeMessage(svg: Svg, markers: any, message: Message, options: D
     return new Dimensions(width, height)
 }
 
-export function sizeSelfMessage(svg: Svg, message: Message, options: DiagramOptions) {
-    const { messages: { fontOptions, selfArrowWidth, padding } } = options
+export function sizeSelfMessage(svg: Svg, message: Message, options: ThemeMessageOptions) {
+    const { font, padding, selfArrowWidth } = options
     let height = 2 * padding
     let width = height + selfArrowWidth
 
     if (message.text && (message.text.trim() !== "")) {
-        const text = drawText(svg, message.text, { align: Align.left, ...fontOptions }) 
+        const text = drawText(svg, message.text, Align.left, font) 
         const bbox = text.bbox()
         height += bbox.height
         width += bbox.width
@@ -43,9 +44,9 @@ export function sizeSelfMessage(svg: Svg, message: Message, options: DiagramOpti
     return new Dimensions(width, height)
 }
 
-export function sizeTextBox(svg: Svg, text: string, options: TextBoxOptions) {
-    const { padding, margin, textOptions: { align, ...fontOptions } } = options
-    const _text = drawText(svg, text, { align, ...fontOptions })
+export function sizeTextBox(svg: Svg, text: string, options: ThemeTextboxOptions) {
+    const { padding, margin, textAlign, font } = options
+    const _text = drawText(svg, text, textAlign, font)
     const bbox = _text.bbox()
     _text.remove()
 
