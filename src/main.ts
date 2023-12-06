@@ -5,5 +5,6 @@
 
 import Parse from './SequenceDiagramParser'
 import Renderer from './SequenceDiagramRenderer'
+import { OptionOverrides } from './Options'
 
-export { Parse, Renderer }
+export { Parse, Renderer, OptionOverrides }

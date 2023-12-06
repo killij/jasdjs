@@ -25,13 +25,11 @@
   ],
   "homepage": "https://github.com/killij/jasdjs#readme",
   "devDependencies": {
-    "@types/lodash.merge": "^4.6.9",
     "@types/node": "^20.9.1",
     "gh-pages": "^6.1.0",
     "typescript": "^5.3.2"
   },
   "dependencies": {
-    "@svgdotjs/svg.js": "^3.2.0",
-    "lodash.merge": "^4.6.2"
+    "@svgdotjs/svg.js": "^3.2.0"
   }
 }

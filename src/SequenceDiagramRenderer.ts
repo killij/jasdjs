@@ -5,10 +5,11 @@
 
 import { G, Marker, SVG, Svg } from '@svgdotjs/svg.js'
 import { Participant, ParticipantTypes, ElementTypes, SequenceDiagram, NoteLocations, ArrowHeadTypes, Message } from "./SequenceDiagramParser"
-import { Options, DeepPartial, DiagramOptions, BackgroundPattern, Align, defaultColour, ActivationOptions } from './Options'
+import { Align, OptionOverrides, BackgroundPattern } from './Options'
 import { Dimensions } from './Dimensions'
 import { DrawMessageResult, drawActor, drawLifeline, drawMessage, drawSelfMessage, drawText, drawTextBox } from './ElementRenderers'
 import { sizeMessage, sizeSelfMessage, sizeTextBox } from './ElementSizers'
+import { ThemeOptions, ThemeTextboxOptions, defaultColour } from './ThemeOptions'
 
 type Point = [number, number]
 export type Points = Point[]
@@ -48,14 +49,14 @@ export class Lifeline {
 }
 
 export default class Renderer {
-    private _options: DiagramOptions
+    private _options: ThemeOptions
     private _diagram: SequenceDiagram
     private _container: HTMLElement
     private _svg: Svg
     private _icons: any = {}
     private _markers: any = {}
 
-    constructor (diagram: SequenceDiagram, container: HTMLElement, options: DeepPartial<DiagramOptions>) {
+    constructor (diagram: SequenceDiagram, container: HTMLElement, options: OptionOverrides) {
         if (!diagram) throw new Error("Invalid parameter: diagram must be specified")
         if (!container) throw new Error("Invalid parameter: container must be specified")
         
@@ -64,7 +65,7 @@ export default class Renderer {
         this._svg = SVG().addTo(container)
 
         this._diagram = diagram
-        this._options = Options.From(options)
+        this._options = new ThemeOptions(options)
 
         const actorGroup = this._svg
             .defs()
@@ -130,8 +131,8 @@ export default class Renderer {
         for (const participant of this._diagram.participants) {
             let el: G
             switch (participant.type) {
-                case ParticipantTypes.lifeline: el = drawTextBox(this._svg, participant.alias, this._options.lifelines.textBoxOptions); break
-                case ParticipantTypes.actor: el = drawActor(this._svg, participant.alias, this._icons.actor, this._options.lifelines.textBoxOptions); break
+                case ParticipantTypes.lifeline: el = drawTextBox(this._svg, participant.alias, this._options.participants.box); break
+                case ParticipantTypes.actor: el = drawActor(this._svg, participant.alias, this._icons.actor, this._options.participants.box); break
             }
     
             const bbox = el.bbox()
@@ -178,19 +179,19 @@ export default class Renderer {
                     const left = this.getLeftLifeline(participantMap, element.source, element.target)
                     const activationsPadding = left.activations * 10
                     if (isSelfMessage) {
-                        const d = sizeSelfMessage(this._svg, element, this._options)
+                        const d = sizeSelfMessage(this._svg, element, this._options.messages)
                         Renderer.setSpacing(lifelines, getIndex(element.source), getIndex(element.target) + 1, d.width + activationsPadding)
                         elementY += d.height
                     } else {
-                        const d = sizeMessage(this._svg, this._markers, element, this._options)
+                        const d = sizeMessage(this._svg, this._markers, element, this._options.messages)
                         Renderer.setSpacing(lifelines, getIndex(element.source), getIndex(element.target), d.width + activationsPadding)
                         elementY += d.height
                     }
                     break
                 }
                 case ElementTypes.note: {
-                    const { overlap, textBoxOptions } = this._options.notes
-                    const noteDimensions = sizeTextBox(this._svg, element.text, textBoxOptions)
+                    const { overlap, box } = this._options.notes
+                    const noteDimensions = sizeTextBox(this._svg, element.text, box)
                     const sourceIndex = getIndex(element.target[0])
 
                     switch (element.location) {
@@ -220,14 +221,14 @@ export default class Renderer {
         const group = this._svg.group()
         group.rect(1, 1).fill("none").stroke("none").move(0,0)
         for (const lifeline of lifelines.slice(1, lifelines.length - 1)) {
-            const lifelineGroup = drawLifeline(group, lifeline, offsetY, this._icons.actor, this._options.lifelines)
+            const lifelineGroup = drawLifeline(group, lifeline, offsetY, this._icons.actor, this._options.participants)
             lifelineGroup.translate(lifeline.x, maxHeight - lifelineGroup.children()[1].bbox().height)
         }
         return group
     }
 
     private renderMessage(group: G, element: Message, offsetY: number, participantMap: ParticipantMap): G {
-        const activationOptions = this._options.messages.activations
+        const activationOptions = this._options.activations
         const source = participantMap.get(element.source)!
         const target = participantMap.get(element.target)!
 
@@ -263,7 +264,8 @@ export default class Renderer {
                 }
             }
             
-            result = drawMessage(group, this._markers, element, leftX, offsetY, width, source.index < target.index, this._options.messages)
+            const arrowHeadMarker = this._markers[element.arrow.head]
+            result = drawMessage(group, arrowHeadMarker, element, leftX, offsetY, width, source.index < target.index, this._options.messages)
         } else {
             let startX = left.cx
             let endX = left.cx
@@ -278,7 +280,8 @@ export default class Renderer {
                 if (element.deactivated) endX -= activationOptions.halfWidth
             }
 
-            result = drawSelfMessage(group, this._markers, element, startX, endX, offsetY, this._options.messages)
+            const arrowHeadMarker = this._markers[element.arrow.head]
+            result = drawSelfMessage(group, arrowHeadMarker, element, startX, endX, offsetY, this._options.messages)
         }
 
         if (element.activated) {
@@ -312,26 +315,23 @@ export default class Renderer {
                     const noteSource = participantMap.get(element.target[0])!
 
                     switch (element.location) {
-                        case NoteLocations.leftOf:
-                            this._options.notes.textBoxOptions.textOptions.align = Align.right
-                            const leftOfNote = drawTextBox(group, element.text, this._options.notes.textBoxOptions).move(0,0)
-                            if (this._options.notes.name) {
-                                leftOfNote.addClass(this._options.notes.name)
-                            }
+                        case NoteLocations.leftOf: {
+                            const noteOptions = new ThemeTextboxOptions(Object.assign({}, this._options.notes.box, { alignText: "right" }))
+                            const leftOfNote = drawTextBox(group, element.text, noteOptions).move(0,0)
+                            leftOfNote.addClass("jasd-note")
                             leftOfNote.translate(noteSource.x + noteSource.dimensions.cx - leftOfNote.bbox().width, offsetY)
                             offsetY += leftOfNote.bbox().height ?? 0
                             break
-                        case NoteLocations.over:
-                            this._options.notes.textBoxOptions.textOptions.align = Align.middle
+                        }
+                        case NoteLocations.over: {
+                            const noteOptions = new ThemeTextboxOptions(Object.assign({}, this._options.notes.box, { alignText: "middle" }))
                             const source = participantMap.get(element.target[0])!
                             const target = element.target.length === 1
                                 ? source
                                 : participantMap.get(element.target[1])!
-                            const minimumWidth = Math.abs(source.x + source.dimensions.cx - (target.x + target.dimensions.cx)) + 2 * this._options.notes.textBoxOptions.margin
-                            const overNote = drawTextBox(group, element.text, this._options.notes.textBoxOptions, minimumWidth).move(0,0)
-                            if (this._options.notes.name) {
-                                overNote.addClass(this._options.notes.name)
-                            }
+                            const minimumWidth = Math.abs(source.x + source.dimensions.cx - (target.x + target.dimensions.cx)) + 2 * this._options.notes.box.margin
+                            const overNote = drawTextBox(group, element.text, noteOptions, minimumWidth).move(0,0)
+                            overNote.addClass("jasd-note")
 
                             if (element.target.length === 1) {
                                 overNote.y(offsetY)
@@ -342,15 +342,15 @@ export default class Renderer {
                             }
                             offsetY += overNote.bbox().height ?? 0
                             break
-                        case NoteLocations.rightOf:
-                            this._options.notes.textBoxOptions.textOptions.align = Align.left
-                            const rightOfNote = drawTextBox(group, element.text, this._options.notes.textBoxOptions).move(0,0)
-                            if (this._options.notes.name) {
-                                rightOfNote.addClass(this._options.notes.name)
-                            }
+                        }
+                        case NoteLocations.rightOf: {
+                            const noteOptions = new ThemeTextboxOptions(Object.assign({}, this._options.notes.box, { alignText: "left" }))
+                            const rightOfNote = drawTextBox(group, element.text, noteOptions).move(0,0)
+                            rightOfNote.addClass("jasd-note")
                             rightOfNote.translate(noteSource.x + noteSource.dimensions.cx, offsetY)
                             offsetY += rightOfNote.bbox().height ?? 0
                             break
+                        }
                     }
                     break
                 }
@@ -362,7 +362,7 @@ export default class Renderer {
     }
 
     private renderActivations(group: G, lifelines: Lifeline[], endY: number) {
-        const options = this._options.messages.activations
+        const options = this._options.activations
         const layer = group.group().back().attr({id: "activationsLayer"})
         for (const lifeline of lifelines) {
             // close off any left over activations
@@ -377,9 +377,8 @@ export default class Renderer {
                 layer
                     .rect(options.width, endY - startY)
                     .y(startY).cx(lifeline.cx + offsetX)
-                    .fill(options.fill)
-                    .stroke(options.stroke)
-                    .attr({"stroke-width": options.strokeWidth})
+                    .fill(options.backgroundColor)
+                    .stroke(options.stroke.getAttr())
                     .back()
             }
         }
@@ -387,9 +386,9 @@ export default class Renderer {
 
     private renderTitle(offsetX: number, offsetY: number, totalWidth: number): G {
         const group = this._svg.group()
-        const _text = drawText(group, this._diagram.title ?? "", this._options.title.textOptions)
+        const _text = drawText(group, this._diagram.title ?? "", this._options.title.align, this._options.title.font)
         
-        switch (this._options.title.textOptions.align) {
+        switch (this._options.title.align) {
             case Align.left:
                 group.move(offsetX, offsetY)
                 break
@@ -405,7 +404,7 @@ export default class Renderer {
         return group
     }
 
-    private renderBackground(diagramWidth: number, diagramHeight: number) {
+    private renderBackground(diagramWidth: number, diagramHeight: number) { // TODO
         const backgroundPattern = this._options.background as BackgroundPattern
         if (backgroundPattern && typeof backgroundPattern.pattern?.func === 'function') {
             const { pattern: { width: w, height: h, func } } = backgroundPattern
