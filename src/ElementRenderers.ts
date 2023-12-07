@@ -176,9 +176,8 @@ export function drawMessage(svg: Svg | G, arrowHead: Marker, message: Message, x
     }
 }
 
-export function drawSelfMessage(svg: Svg | G, markers: any, message: Message, startX: number, endX: number, y: number, options: ThemeMessageOptions): DrawMessageResult {
+export function drawSelfMessage(svg: Svg | G, marker: Marker, message: Message, startX: number, endX: number, y: number, options: ThemeMessageOptions): DrawMessageResult {
     const { font, padding, arrow, selfArrowWidth } = options
-    
     const group = svg.group().attr({ class: "jasd-self-message" })
 
     let offsetY = y + padding
@@ -201,9 +200,7 @@ export function drawSelfMessage(svg: Svg | G, markers: any, message: Message, st
         [endX, endY]
     ]
 
-    const { arrow: { head, line } } = message
-
-    drawArrow(group, markers[message.arrow.head], line, points, arrow)
+    drawArrow(group, marker, message.arrow.line, points, arrow)
 
     offsetY += padding
     group.rect(width, offsetY - y).fill("none").stroke("none").move(startX, y).back()
