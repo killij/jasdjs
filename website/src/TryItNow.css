@@ -2,8 +2,25 @@
   filter: drop-shadow(3px 5px 2px rgb(0 0 0 / 0.2));
 }
 
-#editor {
-  min-width: 400px;
-  width: 400px;
-  border-right: 1px solid #ccc;
+.editor-column {
+  /* border: 3px solid red; */
+  border-right: 2px solid #ccc;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+}
+
+.diagram-column {
+  box-sizing: border-box;
+  flex: 1 1 auto;
+  /* border: 3px solid blue; */
+  overflow: hidden;
+  position: relative;
+}
+
+.diagram-wrapper {
+  width: 100%;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  /* background-color: #ccc; */
 }
