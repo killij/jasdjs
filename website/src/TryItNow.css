@@ -24,3 +24,8 @@
   bottom: 0;
   /* background-color: #ccc; */
 }
+
+.diagram {
+  width: 100%;
+  height: 100%;
+}

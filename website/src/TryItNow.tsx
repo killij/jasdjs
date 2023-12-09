@@ -7,8 +7,8 @@ import Header from "./Header"
 import TalentTheme from "./themes/talent"
 import BasicTheme from "./themes/basic"
 import debounce from "lodash.debounce"
-import panzoom from "panzoom"
 import "./TryItNow.css"
+import PanZoom from "./PanZoom"
 
 function getTheme(id: string) {
     switch (id) {
@@ -43,6 +43,9 @@ function renderDiagram(text: string, theme: object) {
 const debouncedRenderDiagram = debounce(renderDiagram, 500)
 
 export default function TryItNow() {
+
+    const divRef = useRef<HTMLDivElement>(null)
+
     const [text, setText] = useState(() => {
         const value = window.localStorage.getItem("jasd-document")
         return value !== null ? value : defaultDocument
@@ -66,37 +69,37 @@ export default function TryItNow() {
         debouncedRenderDiagram(text, theme)
     }, [setText, theme])
 
-    const diagramHost = useRef<HTMLDivElement>(null)
-
     useEffect(() => {
         renderDiagram(text, theme)
-        const el = document.getElementById('diagram')!
-        const ref = panzoom(el, {
-            maxZoom: 2,
-            minZoom: 0.3
-        })
-        return () => ref.dispose()
-    }, [diagramHost])
+
+        
+    }, [text, theme])
+
+    function handleResetViewClick() {
+
+    }
 
     return <>
-            <div className="page-header">
-                <Header />
-                <Toolbar selectedTheme={themeId} onThemeSelect={handleThemeSelect} />
+        <div className="page-header">
+            <Header />
+            <Toolbar selectedTheme={themeId} onThemeSelect={handleThemeSelect} onResetViewClick={handleResetViewClick}/>
+        </div>
+        <div className="page-body">
+            <div className="editor-column">
+                <AceEditor name="editor"
+                    mode="text" theme="xcode"
+                    width="400px" height="100%"
+                    onChange={handleDocumentChange}
+                    value={text}
+                />
             </div>
-            <div className="page-body">
-                <div className="editor-column">
-                    <AceEditor name="editor"
-                        mode="text" theme="xcode"
-                        width="400px" height="100%"
-                        onChange={handleDocumentChange}
-                        value={text}
-                    />
-                </div>
-                <div className="diagram-column">
-                    <div className="diagram-wrapper">
-                        <div id="diagram" ref={diagramHost}></div>
-                    </div>
+            <div className="diagram-column">
+                <div className="diagram-wrapper">
+                    <PanZoom>
+                        <div id="diagram" ref={divRef} ></div>
+                    </PanZoom>
                 </div>
             </div>
-        </>
+        </div>
+    </>
 }

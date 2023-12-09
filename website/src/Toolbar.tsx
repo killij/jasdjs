@@ -1,8 +1,10 @@
-import Dropdown from 'react-bootstrap/Dropdown'
-import DropdownButton from 'react-bootstrap/DropdownButton'
+import Container from 'react-bootstrap/Container';
+import Nav from 'react-bootstrap/Nav';
+import Navbar from 'react-bootstrap/Navbar';
+import NavDropdown from 'react-bootstrap/NavDropdown';
 import './Toolbar.css'
 
-export default function Toolbar({ selectedTheme, onThemeSelect }: any) {
+export default function Toolbar({ selectedTheme, onThemeSelect, onResetViewClick }: any) {
     
     const defaultThemes = [
         {
@@ -26,21 +28,28 @@ export default function Toolbar({ selectedTheme, onThemeSelect }: any) {
     ]
     
     return (
-        <div className="container-fluid toolbar bg-dark">
-            <DropdownButton  key="theme" drop="down" variant="secondary" title="Theme" onSelect={onThemeSelect}>
-                {
-                    defaultThemes.map(theme => {
-                        return <Dropdown.Item key={theme.key} eventKey={theme.key} active={theme.selected} className="checked">{theme.title}</Dropdown.Item>
-                    })
-                }
-                <Dropdown.Divider />
-                <Dropdown.Header>Sponsors</Dropdown.Header>
-                {
-                    sponsorThemes.map(theme => {
-                        return <Dropdown.Item key={theme.key} eventKey={theme.key} active={theme.selected} className="checked">{theme.title}</Dropdown.Item>
-                    })
-                }
-            </DropdownButton>
-        </div>
+        <Navbar expand="lg" bg="dark" as="div" data-bs-theme="dark" role="toolbar">
+            <Container fluid>
+                <Nav className="me-start">
+                    <NavDropdown key="theme" drop="down" title="Theme" onSelect={onThemeSelect}>
+                        {
+                            defaultThemes.map(theme => {
+                                return <NavDropdown.Item key={theme.key} eventKey={theme.key} active={theme.selected} className="checked">{theme.title}</NavDropdown.Item>
+                            })
+                        }
+                        <NavDropdown.Divider />
+                        <NavDropdown.Header>Sponsors</NavDropdown.Header>
+                        {
+                            sponsorThemes.map(theme => {
+                                return <NavDropdown.Item key={theme.key} eventKey={theme.key} active={theme.selected} className="checked">{theme.title}</NavDropdown.Item>
+                            })
+                        }
+                    </NavDropdown>
+                </Nav>
+                <Nav className="me-end">
+                    <Nav.Link onClick={onResetViewClick}>Reset view</Nav.Link>
+                </Nav>
+            </Container>
+        </Navbar>
     )
 }

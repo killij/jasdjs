@@ -26,14 +26,11 @@ const PanZoom = (props: any) => {
 
             const diffX = event.clientX - origin!.x
             const diffY = event.clientY - origin!.y
-
             const currentMatrix = new DOMMatrix(innerRef.current.style.transform)
-            const currentScale = currentMatrix.m11
 
             let matrix = new DOMMatrix()
-            //matrix = matrix.multiply(new DOMMatrix(innerRef.current.style.transform))
             matrix = matrix.multiply(transform)
-            matrix = matrix.translate(diffX * 1/currentScale, diffY * 1/currentScale)
+            matrix = matrix.translate(diffX * 1/currentMatrix.m11, diffY * 1/currentMatrix.m11)
             innerRef.current.style.transform = matrix.toString()
         }
     }, [panActive, innerRef, origin, transform])
@@ -44,42 +41,27 @@ const PanZoom = (props: any) => {
     }, [setPanActive])
 
     const handleWheel = useCallback((event: WheelEvent<HTMLDivElement>) => {
-        event.preventDefault()
+        event.stopPropagation()
         if (!innerRef.current || !outerRef.current){
             return
         }
 
         const rect = outerRef.current.getBoundingClientRect()
         const point = new DOMPoint(event.clientX - rect.left - rect.width / 2, event.clientY - rect.top - rect.height / 2)
+        const scale = 1 - event.deltaY * 0.001
 
         const newTransform = new DOMMatrix()
         const currentTransform = new DOMMatrix(innerRef.current?.style.transform)
 
         newTransform.translateSelf(point.x, point.y)
-        const scale = 1 - event.deltaY * 0.001
         newTransform.scaleSelf(scale, scale)
+
+        //const clamp = (min: number, val: number, max: number) => Math.max(min, Math.min(val, max))
         newTransform.translateSelf(-point.x, -point.y)
         newTransform.multiplySelf(currentTransform)
 
-        innerRef.current.style.transform = newTransform?.toString() ?? ""
+        innerRef.current.style.transform = newTransform.toString()
         setTransform(newTransform)
-
-        // //currentTransform.translateSelf(event.clientX, event.clientY)
-
-        // scaledTransform.multiplySelf(currentTransform)
-        // innerRef.current.style.transform = scaledTransform?.toString() ?? ""
-        // setTransform(scaledTransform)
-
-
-        
-        // const scaledTransform = new DOMMatrix(`scale(${1 - event.deltaY * 0.001})`)
-        // const currentTransform = new DOMMatrix(innerRef.current?.style.transform)
-
-        // //currentTransform.translateSelf(event.clientX, event.clientY)
-
-        // scaledTransform.multiplySelf(currentTransform)
-        // innerRef.current.style.transform = scaledTransform?.toString() ?? ""
-        // setTransform(scaledTransform)
     }, [innerRef, outerRef])
 
     return <>

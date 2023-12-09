@@ -4,7 +4,7 @@ import TryItNow from './TryItNow'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css'
 
-export default function () {
+const App = () => {
     return (
         <div className="page-wrapper">
             <HashRouter>
@@ -17,3 +17,5 @@ export default function () {
         </div>
     )
 }
+
+export default App
