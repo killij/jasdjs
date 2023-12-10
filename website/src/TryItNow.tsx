@@ -8,7 +8,7 @@ import TalentTheme from "./themes/talent"
 import BasicTheme from "./themes/basic"
 import debounce from "lodash.debounce"
 import "./TryItNow.css"
-import PanZoom from "./PanZoom"
+import PanZoom, { PanZoomHandle } from "./PanZoom"
 
 function getTheme(id: string) {
     switch (id) {
@@ -44,7 +44,7 @@ const debouncedRenderDiagram = debounce(renderDiagram, 500)
 
 export default function TryItNow() {
 
-    const divRef = useRef<HTMLDivElement>(null)
+    const pzRef = useRef<PanZoomHandle>(null)
 
     const [text, setText] = useState(() => {
         const value = window.localStorage.getItem("jasd-document")
@@ -76,7 +76,9 @@ export default function TryItNow() {
     }, [text, theme])
 
     function handleResetViewClick() {
-
+        if (pzRef.current) {
+            pzRef.current.resetTransform()
+        }
     }
 
     return <>
@@ -95,8 +97,8 @@ export default function TryItNow() {
             </div>
             <div className="diagram-column">
                 <div className="diagram-wrapper">
-                    <PanZoom>
-                        <div id="diagram" ref={divRef} ></div>
+                    <PanZoom ref={pzRef}>
+                        <div id="diagram"></div>
                     </PanZoom>
                 </div>
             </div>

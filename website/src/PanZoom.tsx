@@ -1,6 +1,21 @@
-import { useCallback, useState, MouseEvent, useRef, WheelEvent } from "react"
+import { useCallback, useState, MouseEvent, useRef, WheelEvent, useImperativeHandle, forwardRef, PropsWithChildren } from "react"
 
-const PanZoom = (props: any) => {
+export type PanZoomHandle = {
+    resetTransform: () => void;
+}
+
+const PanZoom = forwardRef<PanZoomHandle, PropsWithChildren>(({ children }, ref) => {
+
+    useImperativeHandle(ref, () => {
+        return {
+            resetTransform() {
+                const transform = new DOMMatrix()
+                setTransform(transform)
+                innerRef.current!.style.transform = transform.toString()
+            }
+        }
+    })
+
     const [panActive, setPanActive] = useState(false)
     const [origin, setOrigin] = useState<DOMPoint>()
     const [transform, setTransform] = useState<DOMMatrix>()
@@ -66,7 +81,6 @@ const PanZoom = (props: any) => {
 
     return <>
     <div id="pan-zoom-wrapper"
-        style={{overflow: "hidden", flex: "1 1 auto"}}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
         onMouseMove={handleMouseMove}
@@ -74,10 +88,10 @@ const PanZoom = (props: any) => {
         onWheel={handleWheel}
         ref={outerRef}>
         <div ref={innerRef}>
-            {props.children}
+            {children}
         </div>
     </div>
     </>
-}
+})
 
 export default PanZoom
