@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import AceEditor from "react-ace"
 import "ace-builds/src-noconflict/theme-xcode"
 import { Parse, Renderer } from "jasdjs"
@@ -6,8 +6,9 @@ import Toolbar from "./Toolbar"
 import Header from "./Header"
 import TalentTheme from "./themes/talent"
 import BasicTheme from "./themes/basic"
-import './TryItNow.css'
 import debounce from "lodash.debounce"
+import "./TryItNow.css"
+import PanZoom, { PanZoomHandle } from "./PanZoom"
 
 function getTheme(id: string) {
     switch (id) {
@@ -42,6 +43,9 @@ function renderDiagram(text: string, theme: object) {
 const debouncedRenderDiagram = debounce(renderDiagram, 500)
 
 export default function TryItNow() {
+
+    const pzRef = useRef<PanZoomHandle>(null)
+
     const [text, setText] = useState(() => {
         const value = window.localStorage.getItem("jasd-document")
         return value !== null ? value : defaultDocument
@@ -67,32 +71,37 @@ export default function TryItNow() {
 
     useEffect(() => {
         renderDiagram(text, theme)
-    }, [])
 
-    return (
-    <>
-        <Header />
-        <Toolbar selectedTheme={themeId} onThemeSelect={handleThemeSelect} />
-        <div className="container-fluid h-100">
-            <div className="row mb-3 text-center h-100">
-                <div className="col-md-4 ps-0 pe-1 themed-grid-col" style={{ backgroundColor: "#ccc", maxWidth: "400px" }}>
-                    <div className="h-100">
-                        <AceEditor name="editor"
-                            mode="text" theme="xcode"
-                            width="" height=""
-                            className="h-100"
-                            onChange={handleDocumentChange}
-                            value={text}
-                        />
-                    </div>
-                </div>
-                <div className="col-md-8 themed-grid-col">
-                    <div className="diagram h-100">
-                        <div id="diagram" className="h-100"></div>
-                    </div>
+        
+    }, [text, theme])
+
+    function handleResetViewClick() {
+        if (pzRef.current) {
+            pzRef.current.resetTransform()
+        }
+    }
+
+    return <>
+        <div className="page-header">
+            <Header />
+            <Toolbar selectedTheme={themeId} onThemeSelect={handleThemeSelect} onResetViewClick={handleResetViewClick}/>
+        </div>
+        <div className="page-body">
+            <div className="editor-column">
+                <AceEditor name="editor"
+                    mode="text" theme="xcode"
+                    width="400px" height="100%"
+                    onChange={handleDocumentChange}
+                    value={text}
+                />
+            </div>
+            <div className="diagram-column">
+                <div className="diagram-wrapper">
+                    <PanZoom ref={pzRef}>
+                        <div id="diagram"></div>
+                    </PanZoom>
                 </div>
             </div>
         </div>
     </>
-    )
 }

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom"
 import Header from "./Header"
 
-export default () => <>
+const Home = () => <>
     <Header />
     <div className="px-4 pt-5 my-5 text-center border-bottom">
         <h1 className="display-4 fw-bold text-body-emphasis">Sequence Diagrams for the masses</h1>
@@ -13,3 +13,5 @@ export default () => <>
         </div>
     </div>
 </>
+
+export default Home

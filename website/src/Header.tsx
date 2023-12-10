@@ -1,7 +1,7 @@
 import { useLocation } from 'react-router-dom'
 import { Link } from "react-router-dom"
 
-export default () => { 
+const Header = () => { 
     const location = useLocation()
     const path = location.pathname
     let homeActive, tryActive = false
@@ -33,3 +33,5 @@ export default () => {
         </header>
     </div>
 }
+
+export default Header
