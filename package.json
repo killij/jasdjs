@@ -1,6 +1,6 @@
 {
   "name": "jasdjs",
-  "version": "1.0.0-pre.5",
+  "version": "1.0.0-pre.6",
   "description": "Just Another Sequence Diagrammer",
   "main": "./dist/main.js",
   "types": "./dist/main.d.ts",
