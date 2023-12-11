@@ -40,6 +40,43 @@ function renderDiagram(text: string, theme: object) {
     }
 }
 
+function downloadAsPng() {
+    const svgElement = document.querySelector('#diagram > svg')!
+    const svgString = new XMLSerializer().serializeToString(svgElement)
+    const svg = new Blob([svgString], {type: "image/svg+xml"})
+    const url = URL.createObjectURL(svg)
+
+    const img = new Image()
+    img.onload = function () {
+        const canvas = document.createElement("canvas")
+        canvas.width = svgElement.clientWidth * 2
+        canvas.height = svgElement.clientHeight * 2
+        const ctx = canvas.getContext('2d')!
+        ctx.scale(2, 2)
+        ctx.drawImage(img, 0, 0)
+        URL.revokeObjectURL(url)
+        const png = canvas.toDataURL("image/png")
+        const a = document.createElement("a")
+        a.href = png
+        a.download = "diagram.png"
+        a.click()
+        a.remove()
+        canvas.remove()
+    }
+    img.src = url
+}
+
+function downloadAsSvg() {
+    const svgElement = document.querySelector('#diagram > svg')!
+    const svgString = new XMLSerializer().serializeToString(svgElement)
+    const svgUrl = 'data:image/svg+xml,' + encodeURIComponent(svgString)
+    const a = document.createElement("a")
+    a.href = svgUrl
+    a.download = "diagram.svg"
+    a.click()
+    a.remove()
+}
+
 const debouncedRenderDiagram = debounce(renderDiagram, 500)
 
 export default function TryItNow() {
@@ -81,10 +118,29 @@ export default function TryItNow() {
         }
     }
 
+    const handleDownloadAs = useCallback((key: string) => {
+        switch (key) {
+            case ("svg"): {
+                downloadAsSvg()
+                break
+            }
+            case ("png"): {
+                //downloadSvgAsPng()
+                downloadAsPng()
+                break
+            }
+        }
+    }, [setThemeId, setTheme, text])
+
     return <>
         <div className="page-header">
             <Header />
-            <Toolbar selectedTheme={themeId} onThemeSelect={handleThemeSelect} onResetViewClick={handleResetViewClick}/>
+            <Toolbar 
+                selectedTheme={themeId}
+                onThemeSelect={handleThemeSelect}
+                onResetViewClick={handleResetViewClick}
+                onDownloadAs={handleDownloadAs}
+                />
         </div>
         <div className="page-body">
             <div className="editor-column">
