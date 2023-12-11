@@ -58,7 +58,7 @@ function talentBackground(draw: any, width: number, height: number) {
 
 const theme: OptionOverrides = {
     defaultFont: {
-        family: "Work Sans"
+        family: "Arial"
     },    
     title: {
         align: "right",

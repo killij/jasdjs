@@ -4,8 +4,7 @@ import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import './Toolbar.css'
 
-export default function Toolbar({ selectedTheme, onThemeSelect, onResetViewClick }: any) {
-    
+export default function Toolbar({ selectedTheme, onThemeSelect, onResetViewClick, onDownloadAs }: any) {
     const defaultThemes = [
         {
             key: "default",
@@ -18,7 +17,6 @@ export default function Toolbar({ selectedTheme, onThemeSelect, onResetViewClick
             selected: selectedTheme === "basic"
         },
     ]
-
     const sponsorThemes = [
         {
             key: "talent",
@@ -48,6 +46,10 @@ export default function Toolbar({ selectedTheme, onThemeSelect, onResetViewClick
                 </Nav>
                 <Nav className="me-end">
                     <Nav.Link onClick={onResetViewClick}>Reset view</Nav.Link>
+                    <NavDropdown key="theme" drop="down" title="Download" onSelect={onDownloadAs}>
+                        <NavDropdown.Item key={"download-png"} eventKey={"png"} active={false}>PNG</NavDropdown.Item>
+                        <NavDropdown.Item key={"download-svg"} eventKey={"svg"} active={false}>SVG</NavDropdown.Item>
+                    </NavDropdown>
                 </Nav>
             </Container>
         </Navbar>
