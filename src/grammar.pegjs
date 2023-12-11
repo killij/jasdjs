@@ -28,7 +28,7 @@ Declaration
     / Actor
     
 Lifeline
-	= ('lifeline:' / 'll:') member:Member {
+	= ('participant:' / 'p:') member:Member {
     return {
     	type: 'declaration',
         participant: 'lifeline',
@@ -37,7 +37,7 @@ Lifeline
     }
 }
 
-Actor = 'actor:' member:Member {
+Actor = ('actor:' / 'a:') member:Member {
     return {
     	type: 'declaration',
         participant: 'actor',
