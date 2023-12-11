@@ -43,24 +43,31 @@ This project is in its infancy atm, so please be patient.
 title: An example
 ```
 
-### Participants (Life lines)
+### Participants
 Standard participants can either be declared inline in message declarations, e.g.
 ```
 a -> b: message text
 ```
 but can also be declared with an [optional] alias, e.g.
 ```
-ll: a
-ll: a as John
+p: a
+p: a as John
+```
+
+You can use both the short and long form:
+```
+p: thing as Short Form
+participant: thing as Long Form
 ```
 
 In the above, you can then use ```a``` in the message declarations whilst ```John``` will appear above and below the lifelife.
 
 Actors need to be declared before they are used, again they can have an optional alias:
 ```
-actor: a
-actor: a as John
+a: a
+a: a as John
 ```
+Again both shot (```a```) and long (```actor```) forms are available.
 
 ### Messages
 Messages are specified between the source and target pariticipants and are separated by an arrow.
