@@ -20,8 +20,8 @@ function getTheme(id: string) {
 
 const defaultDocument = `title: A title
 
-ll: j as John
-ll: s as Simon
+p: j as John
+p: s as Simon
 
 j -> s: Hello
 s --> j: "Hi, how are you?"
