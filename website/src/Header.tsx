@@ -16,12 +16,6 @@ const Header = () => {
             </Link>
             <ul className="nav nav-pills">
                 <li className="nav-item">
-                    <Link to="/index" className={`nav-link ${homeActive ? "active" : ""}`}>Home</Link>
-                </li>
-                <li className="nav-item">
-                    <Link to="/tryitnow" className={`nav-link ${tryActive ? "active" : ""}`}>Try it now</Link>
-                </li>
-                <li className="nav-item">
                     <a href="https://github.com/killij/jasdjs" className="nav-link text-dark">
                         Github&nbsp;
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="black" className="bi bi-github" viewBox="0 0 16 16">
