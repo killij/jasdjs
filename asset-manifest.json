@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/jasdjs/static/css/main.4743e0ab.css",
-    "main.js": "/jasdjs/static/js/main.0a7c25a6.js",
+    "main.js": "/jasdjs/static/js/main.1737d6e8.js",
     "index.html": "/jasdjs/index.html",
     "main.4743e0ab.css.map": "/jasdjs/static/css/main.4743e0ab.css.map",
-    "main.0a7c25a6.js.map": "/jasdjs/static/js/main.0a7c25a6.js.map"
+    "main.1737d6e8.js.map": "/jasdjs/static/js/main.1737d6e8.js.map"
   },
   "entrypoints": [
     "static/css/main.4743e0ab.css",
-    "static/js/main.0a7c25a6.js"
+    "static/js/main.1737d6e8.js"
   ]
 }
